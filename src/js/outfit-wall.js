@@ -173,24 +173,45 @@
       if (weight) userInfoText += ' / ' + weight + 'kg';
       modalUserName.textContent = userInfoText;
     }
+
     
-    // 更新 Instagram 顯示
-    if (modalUserInfo) {
-      if (instagramUsername) {
-        modalUserInfo.innerHTML = `
-          <span class="instagram-info-modal">
-            <svg class="instagram-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-            </svg>
-            <a href="${instagramUrl}" target="_blank" class="instagram-link">@${instagramUsername}</a>
-          </span>
-        `;
-      } else {
-        modalUserInfo.textContent = submitTime ? '投稿時間：' + submitTime.split(' ')[0] : '';
-      }
+    // 更新 Instagram 顯示（分離圖標連結和帳號文字）
+if (modalUserInfo) {
+  // 優先使用單獨的帳號欄位，如果沒有則從 URL 提取
+  let instagramHandle = outfit['Instagram帳號'] || '';
+  
+  if (!instagramHandle && instagramUrl) {
+    const match = instagramUrl.match(/(?:instagram\.com|instagr\.am)\/([^\/\?\#\&]+)/);
+    instagramHandle = match ? match[1] : '';
+  }
+  
+  if (instagramHandle || instagramUrl) {
+    let htmlContent = '<div class="instagram-display">';
+    
+    // Instagram 圖標（可點擊，連結到 Instagram）
+    if (instagramUrl) {
+      htmlContent += `
+        <a href="${instagramUrl}" target="_blank" class="instagram-icon-link" title="查看 Instagram">
+          <svg class="instagram-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
+        </a>
+      `;
     }
+    
+    // Instagram 帳號（純文字，不可點擊）
+    if (instagramHandle) {
+      htmlContent += `<span class="instagram-handle-text">@${instagramHandle}</span>`;
+    }
+    
+    htmlContent += '</div>';
+    modalUserInfo.innerHTML = htmlContent;
+  } else {
+    modalUserInfo.textContent = submitTime ? '投稿時間：' + submitTime.split(' ')[0] : '';
+  }
+}
     
     // 隱藏原本的統計區域（身高體重已整合到用戶名旁）
     const statsElement = document.querySelector('.modal-stats');
