@@ -709,3 +709,23 @@ function setupDebug() {
   
   console.log('🎯 除錯功能已設定完成');
 }
+// 確保 DOM 載入完成後執行初始化
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM 載入完成，開始初始化...');
+    initUploadForm();
+  });
+} else {
+  // DOM 已經載入完成
+  console.log('DOM 已載入，直接初始化...');
+  initUploadForm();
+}
+
+// 備用方案：確保初始化
+window.addEventListener('load', function() {
+  // 檢查是否已經初始化
+  if (!document.getElementById('imageInput').onchange) {
+    console.log('⚠️ 偵測到未初始化，執行備用初始化...');
+    initUploadForm();
+  }
+});
