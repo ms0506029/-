@@ -91,6 +91,8 @@ function setupImageUpload() {
     console.log('imageInput:', imageInput);
     return;
   }
+  // 移除 required 屬性以避免錯誤
+  imageInput.removeAttribute('required');
   
   // 移除舊的事件監聽器（避免重複綁定）
   var newImageUpload = imageUpload.cloneNode(true);
