@@ -11,7 +11,7 @@ var selectedAvatar = null;
 var isLoggedIn = false;
 
 // 使用 window 全域變數檢查登入狀態
-var isLoggedIn = window.isLoggedIn || false;
+var isLoggedIn = window.isLoggedIn === true;
 var customerInfo = window.customerInfo || null;
 
 if (isLoggedIn) {
