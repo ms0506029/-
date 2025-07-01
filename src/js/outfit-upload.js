@@ -7,9 +7,8 @@ console.log('🚀 開始載入升級版穿搭投稿系統...');
 
 var selectedImage = null;
 var selectedAvatar = null;
-// ❌ 刪除所有 isLoggedIn 的本地變數宣告
 
-// ✅ 直接檢查 window.isLoggedIn
+// 直接檢查 window.isLoggedIn
 if (window.isLoggedIn) {
   console.log('✅ 使用者已登入:', window.customerInfo);
 } else {
@@ -27,42 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // 設定商品資訊切換功能
   setupProductInputs();
 });
-
-// 其他函數中統一使用 window.isLoggedIn
-function updateLoginStatus() {
-  console.log('🔄 更新登入狀態...');
-  
-  var memberStatus = document.getElementById('memberStatus');
-  if (!memberStatus) {
-    console.warn('⚠️ 找不到 memberStatus 元素');
-    return;
-  }
-  
-  if (window.isLoggedIn) {  // 使用 window.isLoggedIn
-    memberStatus.innerHTML = '<strong>歡迎！</strong> 準備分享你的穿搭吧！';
-    memberStatus.className = 'welcome-message';
-    
-    var displayNameInput = document.getElementById('displayName');
-    if (displayNameInput && window.customerInfo && window.customerInfo.name) {
-      displayNameInput.value = window.customerInfo.name;
-    }
-  } else {
-    memberStatus.innerHTML = '<strong>提醒：</strong> 需要先 <a href="/account/login?return_to=' + encodeURIComponent(window.location.href) + '">登入會員</a> 才能投稿穿搭照片';
-    memberStatus.className = 'login-prompt';
-  }
-}
-
-function submitOutfit() {
-  console.log('🚀 開始提交升級版穿搭...');
-  
-  if (!window.isLoggedIn) {  // 使用 window.isLoggedIn
-    window.showToast('❌ 請先登入會員才能投稿');
-    setTimeout(() => {
-      window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
-    }, 1500);
-    return;
-  }
-
 
 // 初始化投稿表單
 function initUploadForm() {
@@ -93,14 +56,14 @@ function updateLoginStatus() {
     return;
   }
   
-  if (isLoggedIn) {
+  if (window.isLoggedIn) {
     memberStatus.innerHTML = '<strong>歡迎！</strong> 準備分享你的穿搭吧！';
     memberStatus.className = 'welcome-message';
     
-    // 自動填入會員名稱（如果有的話）
+    // 自動填入會員名稱
     var displayNameInput = document.getElementById('displayName');
-    if (displayNameInput && typeof customerName !== 'undefined') {
-      displayNameInput.value = customerName;
+    if (displayNameInput && window.customerInfo && window.customerInfo.name) {
+      displayNameInput.value = window.customerInfo.name;
     }
   } else {
     memberStatus.innerHTML = '<strong>提醒：</strong> 需要先 <a href="/account/login?return_to=' + encodeURIComponent(window.location.href) + '">登入會員</a> 才能投稿穿搭照片';
@@ -202,6 +165,7 @@ function handleAvatarSelect(file) {
   };
   reader.readAsDataURL(file);
 }
+
 // 處理圖片選擇
 function handleImageSelect(file) {
   console.log('🖼️ 處理圖片:', file.name);
@@ -230,7 +194,7 @@ function handleImageSelect(file) {
   reader.readAsDataURL(file);
 }
 
-// 新增：設定商品資訊輸入切換
+// 設定商品資訊輸入切換
 function setupProductInputs() {
   console.log('🛍️ 設定商品資訊輸入切換...');
   
@@ -273,7 +237,7 @@ function toggleProductInput(type, mode) {
   }
 }
 
-// 新增：展開/收合進階商品選項
+// 展開/收合進階商品選項
 window.toggleAdvancedProducts = function() {
   var container = document.getElementById('advancedProductContainer');
   var icon = document.getElementById('toggleIcon');
@@ -334,7 +298,7 @@ function setupFormSubmit() {
 function submitOutfit() {
   console.log('🚀 開始提交升級版穿搭...');
   
-  if (!isLoggedIn) {
+  if (!window.isLoggedIn) {
     window.showToast('❌ 請先登入會員才能投稿');
     setTimeout(() => {
       window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
@@ -367,7 +331,7 @@ function submitOutfit() {
     submitTime: new Date().toISOString()
   };
   
-  // 新增：收集商品資訊
+  // 收集商品資訊
   collectProductInfo(formData);
   
   console.log('📊 升級版表單資料:', formData);
@@ -466,7 +430,7 @@ function submitOutfit() {
     });
 }
 
-// 新增：收集商品資訊
+// 收集商品資訊
 function collectProductInfo(formData) {
   // 基本商品資訊
   var basicType = document.querySelector('input[name="basicProductType"]:checked');
@@ -517,6 +481,7 @@ function collectProductInfo(formData) {
     accessory: formData.accessoryProductInfo
   });
 }
+
 // 上傳圖片（暫時使用測試圖片）
 function uploadImageToImgur(file) {
   return new Promise(function(resolve, reject) {
@@ -634,7 +599,7 @@ function resetForm() {
   selectedAvatar = null;
   
   // 重新填入會員名稱（如果已登入）
-  if (isLoggedIn) {
+  if (window.isLoggedIn) {
     updateLoginStatus();
   }
   
@@ -667,7 +632,7 @@ function resetProductInputs() {
 // 設定除錯功能
 function setupDebug() {
   window.outfitDebug = {
-    isLoggedIn: window.isLoggedIn,  // 使用 window.isLoggedIn
+    isLoggedIn: window.isLoggedIn,
     selectedImage: selectedImage,
     checkElements: function() {
       console.log('🔍 檢查元素:');
