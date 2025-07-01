@@ -1340,32 +1340,62 @@
 
 /* ===== 模態框優化樣式 ===== */
 
-/* Instagram 資訊樣式 */
-.instagram-info-modal {
+/* Instagram 輸入欄位樣式 */
+.instagram-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.instagram-prefix {
+  position: absolute;
+  left: 15px;
+  color: #7f8c8d;
+  font-weight: 500;
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.instagram-input-wrapper input {
+  padding-left: 35px;
+}
+/* 模態框 Instagram 顯示樣式 */
+.instagram-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.instagram-icon-link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  transition: transform 0.2s;
+}
+
+.instagram-icon-link:hover {
+  transform: scale(1.1);
+}
+
+.instagram-icon-link .instagram-icon {
+  color: #c13584;
+}
+
+.instagram-handle-text {
+  color: #7f8c8d;
   font-size: 0.9rem;
-  color: #7f8c8d;
+  font-weight: 400;
+}
+/* 修復上傳區域的游標樣式 */
+#imageUpload,
+#avatarUpload {
+  cursor: pointer !important;
 }
 
-.instagram-icon {
-  width: 14px;
-  height: 14px;
-  color: #c13584;
-  flex-shrink: 0;
+#imageUpload:hover,
+#avatarUpload:hover {
+  opacity: 0.9;
 }
-
-.instagram-link {
-  color: #7f8c8d;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.instagram-link:hover {
-  color: #c13584;
-}
-
 /* 突出留言區域 */
 .modal-comment.comment-highlight,
 .comment-highlight {
