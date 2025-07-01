@@ -11,24 +11,23 @@ var isLoggedIn = false;
 var customerInfo = null;
 
 document.addEventListener('DOMContentLoaded', function () {
-  console.log('📄 頁面載入完成，開始初始化...');
-
-  // ✅ 改為直接判斷 EasyStore 的全域變數 customer
-  if (typeof customer !== 'undefined' && customer) {
-    isLoggedIn = true;
-    customerInfo = customer;
-    console.log('✅ 使用者已登入:', customer.email);
-  } else {
-    isLoggedIn = false;
-    customerInfo = null;
-    console.log('❌ 使用者未登入');
-  }
+  customerInfo = window.customerInfo || null;
+  isLoggedIn = Boolean(customerInfo && customerInfo.id);
 
   if (isLoggedIn) {
-    console.log('✅ 使用者已登入:', customerInfo);
+    console.log('✅ 使用者已登入：', customerInfo.email);
   } else {
     console.log('❌ 使用者未登入');
   }
+
+  // 以下邏輯才初始化表單
+  if (isLoggedIn) {
+    initUploadForm();
+    setupDebug();
+    setupProductInputs();
+  }
+});
+
   
   // 初始化投稿表單
   initUploadForm();
