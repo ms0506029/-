@@ -10,19 +10,20 @@ var selectedImage = null;
 var selectedAvatar = null;
 var isLoggedIn = false;
 
-// 使用 window 全域變數檢查登入狀態
-var isLoggedIn = window.isLoggedIn === true;
-var customerInfo = window.customerInfo || null;
 
-if (isLoggedIn) {
-  console.log('✅ 使用者已登入:', customerInfo);
-} else {
-  console.log('❌ 使用者未登入');
-}
 
 // 等待頁面完全載入
 document.addEventListener('DOMContentLoaded', function() {
   console.log('📄 頁面載入完成，開始初始化...');
+  // 使用 window 全域變數檢查登入狀態
+  var isLoggedIn = window.isLoggedIn === true;
+  var customerInfo = window.customerInfo || null;
+  
+  if (isLoggedIn) {
+    console.log('✅ 使用者已登入:', customerInfo);
+  } else {
+    console.log('❌ 使用者未登入');
+  }
   
   // 初始化投稿表單
   initUploadForm();
