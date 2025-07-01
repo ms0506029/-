@@ -7,20 +7,21 @@ console.log('🚀 開始載入升級版穿搭投稿系統...');
 
 var selectedImage = null;
 var selectedAvatar = null;
-var isLoggedIn = false;
+// 移除這裡的 isLoggedIn 宣告，避免重複
 
-// 使用 window 全域變數檢查登入狀態
-var isLoggedIn = window.isLoggedIn || false;
-var customerInfo = window.customerInfo || null;
+// 等待 DOM 載入完成後再檢查登入狀態
+document.addEventListener('DOMContentLoaded', function() {
+  // 使用 window 全域變數檢查登入狀態
+  var isLoggedIn = window.isLoggedIn || false;
+  var customerInfo = window.customerInfo || null;
 
-if (isLoggedIn) {
-  console.log('✅ 使用者已登入:', customerInfo);
-} else {
-  console.log('❌ 使用者未登入');
-}
+  if (isLoggedIn) {
+    console.log('✅ 使用者已登入:', customerInfo);
+  } else {
+    console.log('❌ 使用者未登入');
+  }
 
-
-// 初始化投稿表單
+  // 初始化投稿表單
   initUploadForm();
   
   // 設定除錯功能
