@@ -1549,3 +1549,14 @@
   font-weight: 600;
   color: #2c3e50;
 }
+/* 確保上傳區域內的元素不攔截點擊 */
+#imageUpload > *,
+#avatarUpload > * {
+  pointer-events: none !important;
+}
+
+#imageUpload,
+#avatarUpload {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
