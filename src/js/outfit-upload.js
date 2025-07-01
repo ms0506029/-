@@ -138,7 +138,7 @@ function setupAvatarUpload() {
   console.log('✅ 頭像上傳設定完成');
 }
 
-// 處理頭像選擇
+// 處理頭像選擇（保持 2MB 限制較合理）
 function handleAvatarSelect(file) {
   console.log('👤 處理頭像:', file.name);
   
@@ -160,13 +160,13 @@ function handleAvatarSelect(file) {
   reader.onload = function(e) {
     var avatarPreview = document.getElementById('avatarPreview');
     if (avatarPreview) {
-      avatarPreview.innerHTML = '<img src="' + e.target.result + '" alt="頭像預覽">';
+      avatarPreview.innerHTML = '<img src="' + e.target.result + '" alt="頭像預覽" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">';
     }
   };
   reader.readAsDataURL(file);
 }
 
-// 處理圖片選擇
+// 處理圖片選擇（將限制改為 10MB）
 function handleImageSelect(file) {
   console.log('🖼️ 處理圖片:', file.name);
   
@@ -175,8 +175,9 @@ function handleImageSelect(file) {
     return;
   }
   
-  if (file.size > 5 * 1024 * 1024) {
-    window.showToast('❌ 圖片大小不能超過5MB');
+  // 修改為 10MB 限制
+  if (file.size > 10 * 1024 * 1024) {
+    window.showToast('❌ 圖片大小不能超過10MB');
     return;
   }
   
