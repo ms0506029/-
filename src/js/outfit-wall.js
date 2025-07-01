@@ -141,35 +141,80 @@
     const comment = outfit['穿搭心得'] || '沒有留下穿搭心得';
     const submitTime = outfit['投稿時間'] || '';
     const instagramUrl = outfit['Instagram連結'] || '';
+    const avatarUrl = outfit['自訂頭像'] || ''; // 新增：自定義頭像
     
-    if (modalImage) modalImage.src = imageUrl;
-    if (modalAvatar) modalAvatar.textContent = name.charAt(0);
-    if (modalUserName) modalUserName.textContent = name;
-    if (modalUserInfo) modalUserInfo.textContent = submitTime ? '投稿時間：' + submitTime.split(' ')[0] : '';
-    if (modalHeight) modalHeight.textContent = height + 'cm';
-    if (modalWeight) modalWeight.textContent = weight + 'kg';
-    if (modalTopSize) modalTopSize.textContent = topSize || '未填寫';
-    if (modalBottomSize) modalBottomSize.textContent = bottomSize || '未填寫';
-    if (modalComment) modalComment.textContent = comment;
-    
-    // 如果沒有體重資料，隱藏該行
-    if (modalWeightRow) {
-      modalWeightRow.style.display = weight ? 'flex' : 'none';
+    // 提取 Instagram 用戶名
+    let instagramUsername = '';
+    if (instagramUrl) {
+      const match = instagramUrl.match(/(?:instagram\.com|instagr\.am)\/([^\/\?\#\&]+)/);
+      instagramUsername = match ? match[1] : '';
     }
     
-    // 新增：顯示商品資訊
-    displayProductInfo(outfit);
+    if (modalImage) modalImage.src = imageUrl;
     
-    // 新增：顯示需求統計
+    // 設置頭像（支援自定義頭像）
+    if (modalAvatar) {
+      if (avatarUrl && avatarUrl.startsWith('http')) {
+        modalAvatar.style.backgroundImage = 'url(' + avatarUrl + ')';
+        modalAvatar.style.backgroundSize = 'cover';
+        modalAvatar.style.backgroundPosition = 'center';
+        modalAvatar.textContent = '';
+        modalAvatar.classList.add('custom-avatar');
+      } else {
+        modalAvatar.style.backgroundImage = '';
+        modalAvatar.textContent = name.charAt(0);
+        modalAvatar.classList.remove('custom-avatar');
+      }
+    }
+    
+    // 更新用戶名和身高體重（整合顯示）
+    if (modalUserName) {
+      let userInfoText = name + ' / ' + height + 'cm';
+      if (weight) userInfoText += ' / ' + weight + 'kg';
+      modalUserName.textContent = userInfoText;
+    }
+    
+    // 更新 Instagram 顯示
+    if (modalUserInfo) {
+      if (instagramUsername) {
+        modalUserInfo.innerHTML = `
+          <span class="instagram-info-modal">
+            <svg class="instagram-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+            <a href="${instagramUrl}" target="_blank" class="instagram-link">@${instagramUsername}</a>
+          </span>
+        `;
+      } else {
+        modalUserInfo.textContent = submitTime ? '投稿時間：' + submitTime.split(' ')[0] : '';
+      }
+    }
+    
+    // 隱藏原本的統計區域（身高體重已整合到用戶名旁）
+    const statsElement = document.querySelector('.modal-stats');
+    if (statsElement) {
+      statsElement.style.display = 'none';
+    }
+    
+    // 保留尺寸資訊（但可以考慮簡化顯示）
+    if (modalTopSize) modalTopSize.textContent = topSize || '未填寫';
+    if (modalBottomSize) modalBottomSize.textContent = bottomSize || '未填寫';
+    
+    // 突出顯示留言
+    if (modalComment) {
+      modalComment.textContent = comment;
+      modalComment.parentElement.classList.add('comment-highlight');
+    }
+    
+    // 其他功能保持不變
+    displayProductInfo(outfit);
     displayDemandStats(outfit);
     
-    // 新增：顯示 Instagram 連結
+    // 隱藏原本的 Instagram 社群區塊（已整合到用戶資訊）
     const modalSocial = document.getElementById('modalSocial');
-    const modalInstagramLink = document.getElementById('modalInstagramLink');
-    if (instagramUrl && modalSocial && modalInstagramLink) {
-      modalInstagramLink.href = instagramUrl;
-      modalSocial.style.display = 'block';
-    } else if (modalSocial) {
+    if (modalSocial) {
       modalSocial.style.display = 'none';
     }
     
@@ -178,7 +223,7 @@
     actionBtns.forEach(btn => {
       btn.classList.remove('liked', 'referenced', 'purchased');
     });
-
+  
     // 重置計數顯示
     const purchaseCountElement = document.getElementById('modalPurchaseCount');
     if (purchaseCountElement) {
@@ -465,6 +510,7 @@
       const submitTime = outfit['投稿時間'] || '';
       const status = outfit['審核狀態'] || '';
       const instagramUrl = outfit['Instagram連結'] || '';
+      const avatarUrl = outfit['自訂頭像'] || ''; // 新增：自定義頭像
       
       console.log('處理投稿 ' + (i+1) + ':', name, '狀態:', status);
       
@@ -474,46 +520,50 @@
         continue;
       }
       
+      // 從 Instagram URL 提取用戶名
+      let instagramUsername = '';
+      if (instagramUrl) {
+        // 支援多種 Instagram URL 格式
+        const match = instagramUrl.match(/(?:instagram\.com|instagr\.am)\/([^\/\?\#\&]+)/);
+        instagramUsername = match ? match[1] : '';
+      }
+      
       let card = '<div class="outfit-card" onclick="openModal(' + i + ')" style="cursor: pointer;">';
       card += '<img src="' + imageUrl + '" alt="' + name + ' 的穿搭" class="outfit-image" onerror="this.src=\'https://placehold.jp/300x350/f8f9fa/333333?text=圖片載入失敗\'">';
       card += '<div class="outfit-info">';
-      card += '<div class="user-info">';
-      card += '<div class="user-avatar">' + name.charAt(0) + '</div>';
-      card += '<div class="user-details">';
-      card += '<h3>' + name + '</h3>';
-      card += '<p>身高: ' + height + 'cm';
-      if (weight) card += ' | 體重: ' + weight + 'kg';
-      card += '</p></div></div>';
       
-      // 尺寸標籤
-      if (topSize || bottomSize) {
-        card += '<div class="size-info">';
-        if (topSize) card += '<span class="size-tag">上衣: ' + topSize + '</span>';
-        if (bottomSize) card += '<span class="size-tag">下身: ' + bottomSize + '</span>';
-        card += '</div>';
+      // 新的用戶資訊佈局
+      card += '<div class="user-info-compact">';
+      
+      // 使用自定義頭像或預設頭像
+      if (avatarUrl && avatarUrl.startsWith('http')) {
+        card += '<div class="user-avatar custom-avatar" style="background-image: url(\'' + avatarUrl + '\'); background-size: cover; background-position: center;"></div>';
+      } else {
+        card += '<div class="user-avatar">' + name.charAt(0) + '</div>';
       }
       
+      card += '<div class="user-details-compact">';
+      // 身高體重整合在名字旁
+      card += '<h3>' + name + ' / ' + height + 'cm';
+      if (weight) card += ' / ' + weight + 'kg';
+      card += '</h3>';
+      
+      // Instagram 顯示在名字下方（如果有）
+      if (instagramUsername) {
+        card += '<p class="instagram-handle">@' + instagramUsername + '</p>';
+      }
+      card += '</div></div>';
+      
+      // 簡化的留言預覽
       if (comment) {
-        const shortComment = comment.length > 50 ? comment.substring(0, 50) + '...' : comment;
-        card += '<div class="outfit-comment">' + shortComment + '</div>';
+        const shortComment = comment.length > 60 ? comment.substring(0, 60) + '...' : comment;
+        card += '<div class="outfit-comment-preview">' + shortComment + '</div>';
       }
       
-      // Instagram 連結
-      if (instagramUrl) {
-        card += '<div style="margin: 8px 0;">';
-        card += '<a href="' + instagramUrl + '" target="_blank" class="instagram-link" onclick="event.stopPropagation();" style="';
-        card += 'display: inline-block; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); ';
-        card += 'color: white; padding: 4px 8px; border-radius: 12px; text-decoration: none; font-size: 0.7rem; transition: transform 0.2s;">';
-        card += '📷 追蹤投稿者</a>';
-        card += '</div>';
-      }
-      
-      // 新增：快速商品預覽
+      // 商品資訊預覽標誌
       const hasProducts = outfit['上衣商品資訊'] || outfit['下身商品資訊'] || outfit['外套商品資訊'] || outfit['鞋子商品資訊'] || outfit['配件商品資訊'];
       if (hasProducts) {
-        card += '<div style="margin: 8px 0; padding: 8px; background: #f8f9fa; border-radius: 6px;">';
-        card += '<small style="color: #667eea; font-weight: 600;">🛍️ 有商品資訊</small>';
-        card += '</div>';
+        card += '<div class="product-badge">🛍️ 含商品資訊</div>';
       }
       
       card += '</div></div>';
