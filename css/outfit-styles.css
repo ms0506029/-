@@ -139,3 +139,1146 @@
   font-size: 0.8rem;
   color: #7f8c8d;
 }
+.size-info {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.size-tag {
+  background: #f8f9fa;
+  color: #495057;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.outfit-comment {
+  color: #555;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.outfit-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid #f1f3f4;
+}
+
+/* 模態框樣式 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 900px;
+  max-height: 90vh;
+  width: 90%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.9);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 1);
+  color: #333;
+  transform: scale(1.1);
+}
+
+.modal-body {
+  display: flex;
+  height: 100%;
+}
+
+.modal-image {
+  flex: 1;
+  background: #f8f9fa;
+}
+
+.modal-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-info {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+.modal-user {
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-user .user-avatar {
+  width: 50px;
+  height: 50px;
+  font-size: 1.2rem;
+  margin-right: 15px;
+}
+
+.modal-user .user-details h2 {
+  margin: 0 0 5px 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+}
+
+.modal-user .user-details p {
+  margin: 0;
+  color: #7f8c8d;
+  font-size: 0.95rem;
+}
+
+.modal-stats {
+  margin-bottom: 25px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.stat-item:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.stat-value {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.modal-comment {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  border-left: 4px solid #667eea;
+}
+
+.modal-comment div {
+  color: #2c3e50;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* 商品資訊樣式 */
+.modal-products {
+  margin-bottom: 25px;
+  background: #fff9e6;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #f39c12;
+}
+
+.modal-products h4 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.product-item:last-child {
+  border-bottom: none;
+}
+
+.product-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.product-info {
+  flex: 1;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.product-link {
+  background: #667eea;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.product-link:hover {
+  background: #5a6fd8;
+  transform: translateY(-1px);
+}
+
+.product-want-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.product-want-btn:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+.product-want-btn:active {
+  transform: translateY(0);
+}
+
+.product-want-btn.clicked {
+  background: #27ae60;
+  animation: pulse 0.6s ease-in-out;
+}
+
+/* 需求統計樣式 */
+.modal-demand {
+  margin-bottom: 25px;
+  background: #f0f8ff;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
+}
+
+.modal-demand h4 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.demand-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.demand-count {
+  background: #3498db;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.action-btn {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  padding: 12px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #495057;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn:hover {
+  background: #e9ecef;
+  border-color: #667eea;
+  color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.action-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2);
+}
+
+.action-btn span:first-child {
+  font-size: 1.1rem;
+}
+
+/* 互動按鈕的已點擊狀態 */
+.action-btn.liked {
+  background: #e8f5e8 !important;
+  border-color: #27ae60 !important;
+  color: #27ae60 !important;
+}
+
+.action-btn.referenced {
+  background: #fff3cd !important;
+  border-color: #ffc107 !important;
+  color: #856404 !important;
+}
+
+.action-btn.purchased {
+  background: #e3f2fd !important;
+  border-color: #2196f3 !important;
+  color: #1565c0 !important;
+}
+
+/* Instagram 按鈕樣式 */
+.modal-social {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.instagram-btn {
+  display: inline-block;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: white !important;
+  padding: 12px 20px;
+  border-radius: 25px;
+  text-decoration: none !important;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.instagram-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(188, 24, 136, 0.3);
+  color: white !important;
+}
+
+/* 按鈕點擊反饋動畫 */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple-effect::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: translate(-50%, -50%);
+  animation: ripple 0.6s linear;
+}
+
+/* 響應式設計 - 穿搭牆 */
+@media (max-width: 1024px) {
+  .outfit-grid { 
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .outfit-grid { 
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  
+  .outfit-container {
+    padding: 20px 15px;
+  }
+  
+  .modal-body {
+    flex-direction: column;
+  }
+  
+  .modal-image {
+    max-height: 50vh;
+  }
+  
+  .modal-info {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .outfit-grid { 
+    grid-template-columns: 1fr;
+  }
+  
+  .outfit-wall-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .modal-content {
+    width: 95%;
+    max-height: 95vh;
+  }
+}
+
+/* ===== 投稿表單樣式 ===== */
+#outfit-upload-form {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.upload-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.upload-header h1 {
+  color: #2c3e50;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.upload-header p {
+  color: #7f8c8d;
+  font-size: 1.1rem;
+}
+
+.demo-notice {
+  background: #e3f2fd;
+  border: 1px solid #2196f3;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.demo-notice h3 {
+  color: #1976d2;
+  margin-bottom: 5px;
+}
+
+.demo-notice p {
+  color: #1565c0;
+  margin: 0;
+}
+
+.login-prompt {
+  background: #fff3cd;
+  color: #856404;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.login-prompt a {
+  color: #856404;
+  font-weight: bold;
+}
+  
+.welcome-message {
+  background: #d4edda !important;
+  color: #155724 !important;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.upload-container {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.required::after {
+  content: " *";
+  color: #e74c3c;
+}
+
+.optional-badge {
+  background: #95a5a6;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.boost-badge {
+  background: #f39c12;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  margin-left: 5px;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.form-text {
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
+.image-upload {
+  border: 2px dashed #bdc3c7;
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.image-upload:hover {
+  border-color: #3498db;
+  background-color: #f8f9fa;
+}
+
+.upload-icon {
+  font-size: 3rem;
+  color: #bdc3c7;
+  margin-bottom: 15px;
+}
+
+.upload-text {
+  color: #7f8c8d;
+  font-size: 1.1rem;
+}
+
+.image-preview {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 頭像上傳樣式 */
+.avatar-upload {
+  border: 2px dashed #bdc3c7;
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.avatar-upload:hover {
+  border-color: #3498db;
+  background-color: #f8f9fa;
+}
+
+.avatar-preview {
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.default-avatar {
+  font-size: 2rem;
+  color: #bdc3c7;
+  margin-bottom: 5px;
+}
+
+.avatar-preview .upload-text {
+  font-size: 0.7rem;
+  color: #7f8c8d;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* 商品資訊區塊樣式 */
+.product-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  border-left: 4px solid #667eea;
+}
+
+.basic-product-info {
+  margin-bottom: 20px;
+}
+
+.basic-product-info h4 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.product-input-group {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e1e8ed;
+}
+
+.product-type-selector {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.product-type-selector label {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  color: #495057;
+  cursor: pointer;
+}
+
+.product-type-selector input[type="radio"] {
+  margin-right: 8px;
+  width: auto;
+}
+
+.product-input-container {
+  margin-bottom: 10px;
+}
+
+.product-input-container input {
+  margin-bottom: 5px;
+}
+
+.product-input-container small {
+  color: #7f8c8d;
+  font-size: 0.8rem;
+}
+
+.advanced-product-info {
+  border-top: 1px solid #e1e8ed;
+  padding-top: 20px;
+}
+
+.toggle-advanced-btn {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all 0.3s;
+  margin-bottom: 15px;
+}
+
+.toggle-advanced-btn:hover {
+  background: #5a6fd8;
+  transform: translateY(-1px);
+}
+
+.toggle-advanced-btn:active {
+  transform: translateY(0);
+}
+
+#advancedProductContainer {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e1e8ed;
+}
+
+.product-detail-group {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.product-detail-group:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.product-detail-group h5 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.benefits-hint {
+  text-align: center;
+  padding: 15px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.benefits-hint small {
+  color: #667eea;
+  font-weight: 500;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.submit-btn:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #7f8c8d;
+}
+
+.success-message {
+  background: #d4edda;
+  color: #155724;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* 響應式設計 - 投稿表單 */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+  }
+  
+  #outfit-upload-form {
+    padding: 15px;
+  }
+  
+  .upload-container {
+    padding: 20px;
+  }
+  
+  .product-type-selector {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* ===== 管理後台樣式 ===== */
+.admin-overlay {
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%; 
+  background: rgba(0,0,0,0.8); 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  z-index: 1000;
+}
+
+.admin-login-box {
+  background: white; 
+  padding: 30px; 
+  border-radius: 12px; 
+  text-align: center; 
+  max-width: 400px; 
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.admin-content {
+  display: none; 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.admin-header {
+  background: white; 
+  padding: 20px; 
+  border-bottom: 2px solid #e1e8ed; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.admin-stats {
+  display: flex; 
+  gap: 30px; 
+  justify-content: center; 
+  flex-wrap: wrap;
+}
+
+.admin-stat-item {
+  text-align: center;
+}
+
+.admin-stat-number {
+  font-size: 1.5rem; 
+  font-weight: bold; 
+  color: #3498db;
+}
+
+.admin-container {
+  max-width: 1200px; 
+  margin: 0 auto; 
+  padding: 30px 20px;
+}
+
+.admin-controls {
+  background: white; 
+  padding: 20px; 
+  border-radius: 12px; 
+  margin-bottom: 30px; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.admin-grid {
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+  gap: 20px;
+}
+
+.admin-card {
+  background: white; 
+  border-radius: 12px; 
+  overflow: hidden; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+  border-left: 4px solid #f39c12;
+  transition: all 0.3s;
+}
+
+.admin-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.admin-card.approved { 
+  border-left-color: #27ae60; 
+}
+
+.admin-card.rejected { 
+  border-left-color: #e74c3c; 
+}
+
+.admin-btn {
+  padding: 8px 16px; 
+  border: none; 
+  border-radius: 6px; 
+  font-size: 0.9rem; 
+  font-weight: 600; 
+  cursor: pointer; 
+  margin: 2px;
+  transition: all 0.2s;
+}
+
+.admin-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.admin-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.admin-btn-approve { 
+  background: #27ae60; 
+  color: white; 
+}
+
+.admin-btn-approve:hover { 
+  background: #229954; 
+}
+
+.admin-btn-reject { 
+  background: #e74c3c; 
+  color: white; 
+}
+
+.admin-btn-reject:hover { 
+  background: #c0392b; 
+}
+
+.admin-btn-secondary { 
+  background: #95a5a6; 
+  color: white; 
+}
+
+.admin-btn-secondary:hover { 
+  background: #7f8c8d; 
+}
+
+/* 登入相關樣式 */
+.login-input {
+  width: 100%; 
+  padding: 12px; 
+  margin-bottom: 15px; 
+  border: 2px solid #e1e8ed; 
+  border-radius: 6px; 
+  font-size: 1rem; 
+  box-sizing: border-box; 
+  transition: all 0.3s;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.login-btn {
+  width: 100%; 
+  padding: 12px; 
+  border: none; 
+  border-radius: 6px; 
+  font-size: 1rem; 
+  font-weight: 600; 
+  cursor: pointer; 
+  transition: all 0.3s; 
+  margin-bottom: 10px;
+}
+
+.login-btn-primary {
+  background: #3498db; 
+  color: white;
+}
+
+.login-btn-primary:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.login-btn-secondary {
+  background: #95a5a6; 
+  color: white;
+}
+
+.login-btn-secondary:hover {
+  background: #7f8c8d;
+}
+
+.login-checkbox {
+  display: flex; 
+  align-items: center; 
+  margin-bottom: 15px; 
+  font-size: 0.9rem; 
+  color: #495057;
+}
+
+.login-checkbox input {
+  margin-right: 8px; 
+  width: auto;
+}
+
+.error-message {
+  color: #e74c3c; 
+  margin-top: 10px; 
+  display: none;
+  padding: 10px; 
+  background: #f8d7da; 
+  border-radius: 6px;
+  border: 1px solid #f5c6cb;
+}
+
+.success-message {
+  color: #155724; 
+  margin-top: 10px; 
+  display: none;
+  padding: 10px; 
+  background: #d4edda; 
+  border-radius: 6px;
+  border: 1px solid #c3e6cb;
+}
+
+/* 詳細檢視樣式 */
+.product-info-section {
+  background: #f8f9fa; 
+  padding: 15px; 
+  margin: 10px 0;
+  border-radius: 8px; 
+  border-left: 4px solid #667eea;
+}
+
+.product-info-section h6 {
+  margin: 0 0 10px 0; 
+  color: #2c3e50; 
+  font-size: 0.9rem;
+}
+
+.product-item {
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 8px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.product-item:last-child { 
+  border-bottom: none; 
+}
+
+.demand-stats {
+  background: #e8f4fd; 
+  padding: 15px; 
+  margin: 10px 0;
+  border-radius: 8px; 
+  border-left: 4px solid #3498db;
+}
+
+.demand-stats h6 {
+  margin: 0 0 10px 0; 
+  color: #2c3e50; 
+  font-size: 0.9rem;
+}
+
+.demand-item {
+  display: flex; 
+  justify-content: space-between; 
+  padding: 5px 0;
+}
+
+.demand-count {
+  background: #3498db; 
+  color: white; 
+  padding: 2px 8px;
+  border-radius: 12px; 
+  font-size: 0.8rem;
+}
