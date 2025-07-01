@@ -73,7 +73,9 @@ function updateLoginStatus() {
   console.log('✅ 登入狀態更新完成');
 }
 
-// 設定圖片上傳
+// 在 outfit-upload.js 中，確保這段程式碼正確執行
+
+// 修復圖片上傳點擊事件
 function setupImageUpload() {
   console.log('📷 設定圖片上傳...');
   
@@ -85,20 +87,23 @@ function setupImageUpload() {
     return;
   }
   
-  // 點擊上傳區域
-  imageUpload.addEventListener('click', function() {
+  // 移除舊的事件監聽器（避免重複綁定）
+  var newImageUpload = imageUpload.cloneNode(true);
+  imageUpload.parentNode.replaceChild(newImageUpload, imageUpload);
+  imageUpload = newImageUpload;
+  
+  // 點擊整個上傳區域觸發檔案選擇
+  imageUpload.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
     console.log('📁 觸發檔案選擇');
-    // 添加按鈕反饋
-    imageUpload.style.transform = 'scale(0.98)';
-    setTimeout(() => {
-      imageUpload.style.transform = 'scale(1)';
-    }, 150);
-    imageInput.click();
+    document.getElementById('imageInput').click();
   });
   
-  // 檔案選擇
-  imageInput.addEventListener('change', function(e) {
-    if (e.target.files.length > 0) {
+  // 檔案選擇事件
+  document.getElementById('imageInput').addEventListener('change', function(e) {
+    console.log('📷 檔案選擇變更');
+    if (e.target.files && e.target.files.length > 0) {
       handleImageSelect(e.target.files[0]);
     }
   });
@@ -106,7 +111,7 @@ function setupImageUpload() {
   console.log('✅ 圖片上傳設定完成');
 }
 
-// 設定頭像上傳
+// 修復頭像上傳點擊事件
 function setupAvatarUpload() {
   console.log('👤 設定頭像上傳...');
   
@@ -118,24 +123,37 @@ function setupAvatarUpload() {
     return;
   }
   
-  // 點擊上傳區域
-  avatarUpload.addEventListener('click', function() {
+  // 移除舊的事件監聽器
+  var newAvatarUpload = avatarUpload.cloneNode(true);
+  avatarUpload.parentNode.replaceChild(newAvatarUpload, avatarUpload);
+  avatarUpload = newAvatarUpload;
+  
+  // 點擊整個上傳區域觸發檔案選擇
+  avatarUpload.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
     console.log('📁 觸發頭像選擇');
-    avatarUpload.style.transform = 'scale(0.98)';
-    setTimeout(() => {
-      avatarUpload.style.transform = 'scale(1)';
-    }, 150);
-    avatarInput.click();
+    document.getElementById('avatarInput').click();
   });
   
-  // 檔案選擇
-  avatarInput.addEventListener('change', function(e) {
-    if (e.target.files.length > 0) {
+  // 檔案選擇事件
+  document.getElementById('avatarInput').addEventListener('change', function(e) {
+    console.log('👤 頭像檔案選擇變更');
+    if (e.target.files && e.target.files.length > 0) {
       handleAvatarSelect(e.target.files[0]);
     }
   });
   
   console.log('✅ 頭像上傳設定完成');
+}
+
+// 除錯：檢查元素是否存在
+function debugUploadElements() {
+  console.log('🔍 檢查上傳元素：');
+  console.log('imageUpload:', document.getElementById('imageUpload'));
+  console.log('imageInput:', document.getElementById('imageInput'));
+  console.log('avatarUpload:', document.getElementById('avatarUpload'));
+  console.log('avatarInput:', document.getElementById('avatarInput'));
 }
 
 // 處理頭像選擇（保持 2MB 限制較合理）
