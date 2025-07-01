@@ -20,12 +20,15 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('❌ 使用者未登入');
   }
 
-  // 以下邏輯才初始化表單
-  if (isLoggedIn) {
-    initUploadForm();
-    setupDebug();
-    setupProductInputs();
-  }
+
+// 初始化投稿表單
+  initUploadForm();
+  
+  // 設定除錯功能
+  setupDebug();
+  
+  // 設定商品資訊切換功能
+  setupProductInputs();
 });
 
 
