@@ -1,0 +1,20 @@
+{
+  "name": "easystore-outfit-system",
+  "version": "4.0.0",
+  "description": "EasyStore 穿搭牆系統",
+  "scripts": {
+    "build": "echo 'Build process would go here'",
+    "test": "echo 'No tests configured'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ms0506029/easystore-outfit-system.git"
+  },
+  "keywords": [
+    "easystore",
+    "outfit",
+    "fashion"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
