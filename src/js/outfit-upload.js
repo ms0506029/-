@@ -79,77 +79,48 @@ function updateLoginStatus() {
 // 在 outfit-upload.js 中，確保這段程式碼正確執行
 
 // 修復圖片上傳點擊事件
+// 設定圖片上傳
 function setupImageUpload() {
   console.log('📷 設定圖片上傳...');
   
-  setTimeout(function() {
-    var imageUpload = document.getElementById('imageUpload');
-    var imageInput = document.getElementById('imageInput');
-    
-    if (!imageUpload || !imageInput) {
-      console.error('❌ 找不到圖片上傳元素');
-      return;
+  var imageInput = document.getElementById('imageInput');
+  
+  if (!imageInput) {
+    console.error('❌ 找不到圖片上傳元素');
+    return;
+  }
+  
+  // 檔案選擇事件
+  imageInput.addEventListener('change', function(e) {
+    console.log('📷 檔案選擇變更');
+    if (e.target.files && e.target.files.length > 0) {
+      handleImageSelect(e.target.files[0]);
     }
-    
-    // 確保子元素不攔截點擊
-    var children = imageUpload.querySelectorAll('*');
-    children.forEach(function(child) {
-      child.style.pointerEvents = 'none';
-    });
-    
-    // 確保父元素可以點擊
-    imageUpload.style.cursor = 'pointer';
-    
-    // 綁定點擊事件
-    imageUpload.onclick = function(e) {
-      e.preventDefault();
-      console.log('📁 圖片區域被點擊');
-      imageInput.click();
-    };
-    
-    // 檔案選擇事件
-    imageInput.onchange = function(e) {
-      if (e.target.files && e.target.files.length > 0) {
-        handleImageSelect(e.target.files[0]);
-      }
-    };
-    
-    console.log('✅ 圖片上傳設定完成');
-  }, 100);
+  });
+  
+  console.log('✅ 圖片上傳設定完成');
 }
 
-// 替換 setupAvatarUpload 函數
+// 設定頭像上傳
 function setupAvatarUpload() {
   console.log('👤 設定頭像上傳...');
   
-  // 使用 setTimeout 確保 DOM 完全載入
-  setTimeout(function() {
-    var avatarUpload = document.getElementById('avatarUpload');
-    var avatarInput = document.getElementById('avatarInput');
-    
-    if (!avatarUpload || !avatarInput) {
-      console.error('❌ 找不到頭像上傳元素');
-      return;
+  var avatarInput = document.getElementById('avatarInput');
+  
+  if (!avatarInput) {
+    console.error('❌ 找不到頭像上傳元素');
+    return;
+  }
+  
+  // 檔案選擇事件
+  avatarInput.addEventListener('change', function(e) {
+    console.log('👤 頭像檔案選擇變更');
+    if (e.target.files && e.target.files.length > 0) {
+      handleAvatarSelect(e.target.files[0]);
     }
-    
-    // 直接使用 onclick
-    avatarUpload.onclick = function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      console.log('📁 頭像區域被點擊');
-      avatarInput.click();
-    };
-    
-    // 設定檔案選擇事件
-    avatarInput.onchange = function(e) {
-      console.log('👤 選擇了頭像');
-      if (e.target.files && e.target.files.length > 0) {
-        handleAvatarSelect(e.target.files[0]);
-      }
-    };
-    
-    console.log('✅ 頭像上傳設定完成');
-  }, 100);
+  });
+  
+  console.log('✅ 頭像上傳設定完成');
 }
 
 // 除錯：檢查元素是否存在
