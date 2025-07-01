@@ -90,18 +90,18 @@ function setupImageUpload() {
     return;
   }
   
-  // 檔案選擇事件
-  imageInput.addEventListener('change', function(e) {
-    console.log('📷 檔案選擇變更');
+  // 直接使用 onchange 事件
+  imageInput.onchange = function(e) {
+    console.log('📷 圖片檔案選擇變更');
     if (e.target.files && e.target.files.length > 0) {
       handleImageSelect(e.target.files[0]);
     }
-  });
+  };
   
   console.log('✅ 圖片上傳設定完成');
 }
 
-// 設定頭像上傳
+// 設定頭像上傳（修正版）
 function setupAvatarUpload() {
   console.log('👤 設定頭像上傳...');
   
@@ -112,13 +112,13 @@ function setupAvatarUpload() {
     return;
   }
   
-  // 檔案選擇事件
-  avatarInput.addEventListener('change', function(e) {
+  // 直接使用 onchange 事件
+  avatarInput.onchange = function(e) {
     console.log('👤 頭像檔案選擇變更');
     if (e.target.files && e.target.files.length > 0) {
       handleAvatarSelect(e.target.files[0]);
     }
-  });
+  };
   
   console.log('✅ 頭像上傳設定完成');
 }
@@ -154,6 +154,7 @@ function handleAvatarSelect(file) {
   reader.onload = function(e) {
     var avatarPreview = document.getElementById('avatarPreview');
     if (avatarPreview) {
+      // 清除原本的內容並顯示圖片
       avatarPreview.innerHTML = '<img src="' + e.target.result + '" alt="頭像預覽" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">';
     }
   };
@@ -169,7 +170,6 @@ function handleImageSelect(file) {
     return;
   }
   
-  // 修改為 10MB 限制
   if (file.size > 10 * 1024 * 1024) {
     window.showToast('❌ 圖片大小不能超過10MB');
     return;
@@ -183,7 +183,7 @@ function handleImageSelect(file) {
   reader.onload = function(e) {
     var imagePreview = document.getElementById('imagePreview');
     if (imagePreview) {
-      imagePreview.innerHTML = '<img src="' + e.target.result + '" alt="預覽圖片"><p style="margin-top: 10px; color: #7f8c8d;">圖片已選擇：' + file.name + '</p>';
+      imagePreview.innerHTML = '<img src="' + e.target.result + '" alt="預覽圖片" style="max-width: 100%; height: auto;"><p style="margin-top: 10px; color: #7f8c8d;">圖片已選擇：' + file.name + '</p>';
     }
   };
   reader.readAsDataURL(file);
@@ -267,24 +267,25 @@ function setupFormSubmit() {
     return;
   }
   
-  // 表單提交事件
-  form.addEventListener('submit', function(e) {
+  // 防止表單預設提交
+  form.onsubmit = function(e) {
     e.preventDefault();
-    console.log('📝 表單提交事件觸發');
-    submitOutfit();
-  });
+    console.log('📝 表單提交事件觸發（已阻止預設行為）');
+    return false;
+  };
+  
+  // 確保按鈕類型正確
+  if (submitBtn.type === 'submit') {
+    submitBtn.type = 'button';
+  }
   
   // 按鈕點擊事件
-  submitBtn.addEventListener('click', function(e) {
+  submitBtn.onclick = function(e) {
     e.preventDefault();
     console.log('🔘 按鈕點擊事件觸發');
-    // 添加按鈕反饋
-    this.style.transform = 'scale(0.98)';
-    setTimeout(() => {
-      this.style.transform = 'scale(1)';
-    }, 150);
     submitOutfit();
-  });
+    return false;
+  };
   
   console.log('✅ 表單提交設定完成');
 }
