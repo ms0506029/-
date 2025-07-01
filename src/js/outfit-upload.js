@@ -43,6 +43,9 @@ function initUploadForm() {
   // 設定表單提交
   setupFormSubmit();
   
+  // === 新增：設定 Instagram 相關事件 ===
+  setupInstagramInputs();
+  
   console.log('✅ 投稿表單初始化完成');
 }
 
@@ -84,25 +87,29 @@ function setupImageUpload() {
   
   if (!imageUpload || !imageInput) {
     console.error('❌ 找不到圖片上傳元素');
+    console.log('imageUpload:', imageUpload);
+    console.log('imageInput:', imageInput);
     return;
   }
   
   // 移除舊的事件監聽器（避免重複綁定）
   var newImageUpload = imageUpload.cloneNode(true);
   imageUpload.parentNode.replaceChild(newImageUpload, imageUpload);
-  imageUpload = newImageUpload;
   
-  // 點擊整個上傳區域觸發檔案選擇
+  // 重新取得元素參考
+  imageUpload = document.getElementById('imageUpload');
+  
+  // 點擊上傳區域觸發檔案選擇
   imageUpload.addEventListener('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
-    console.log('📁 觸發檔案選擇');
+    console.log('📁 觸發圖片檔案選擇');
     document.getElementById('imageInput').click();
   });
   
   // 檔案選擇事件
   document.getElementById('imageInput').addEventListener('change', function(e) {
-    console.log('📷 檔案選擇變更');
+    console.log('📷 圖片檔案選擇變更');
     if (e.target.files && e.target.files.length > 0) {
       handleImageSelect(e.target.files[0]);
     }
@@ -111,7 +118,6 @@ function setupImageUpload() {
   console.log('✅ 圖片上傳設定完成');
 }
 
-// 修復頭像上傳點擊事件
 function setupAvatarUpload() {
   console.log('👤 設定頭像上傳...');
   
@@ -120,19 +126,23 @@ function setupAvatarUpload() {
   
   if (!avatarUpload || !avatarInput) {
     console.error('❌ 找不到頭像上傳元素');
+    console.log('avatarUpload:', avatarUpload);
+    console.log('avatarInput:', avatarInput);
     return;
   }
   
   // 移除舊的事件監聽器
   var newAvatarUpload = avatarUpload.cloneNode(true);
   avatarUpload.parentNode.replaceChild(newAvatarUpload, avatarUpload);
-  avatarUpload = newAvatarUpload;
   
-  // 點擊整個上傳區域觸發檔案選擇
+  // 重新取得元素參考
+  avatarUpload = document.getElementById('avatarUpload');
+  
+  // 點擊上傳區域觸發檔案選擇
   avatarUpload.addEventListener('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
-    console.log('📁 觸發頭像選擇');
+    console.log('📁 觸發頭像檔案選擇');
     document.getElementById('avatarInput').click();
   });
   
@@ -346,9 +356,34 @@ function submitOutfit() {
     topSize: document.getElementById('topSize').value,
     bottomSize: document.getElementById('bottomSize').value,
     comment: document.getElementById('comment').value.trim(),
-    instagramUrl: document.getElementById('instagramUrl').value.trim(),
     submitTime: new Date().toISOString()
   };
+  
+  // === 新增：收集 Instagram 資訊 ===
+  var instagramHandle = document.getElementById('instagramHandle').value.trim();
+  var instagramUrl = document.getElementById('instagramUrl').value.trim();
+  
+  // 處理 Instagram 資料
+  if (instagramUrl) {
+    formData.instagramUrl = instagramUrl;
+    // 從連結提取帳號（如果沒有單獨填寫帳號）
+    if (!instagramHandle) {
+      const match = instagramUrl.match(/(?:instagram\.com|instagr\.am)\/([^\/\?\#\&]+)/);
+      if (match) {
+        formData.instagramHandle = match[1];
+      }
+    } else {
+      formData.instagramHandle = instagramHandle;
+    }
+  } else if (instagramHandle) {
+    // 只有帳號，自動生成連結
+    formData.instagramHandle = instagramHandle;
+    formData.instagramUrl = 'https://instagram.com/' + instagramHandle;
+  } else {
+    // 都沒填
+    formData.instagramHandle = '';
+    formData.instagramUrl = '';
+  }
   
   // 收集商品資訊
   collectProductInfo(formData);
@@ -448,7 +483,40 @@ function submitOutfit() {
       resetSubmitButton();
     });
 }
-
+function setupInstagramInputs() {
+  console.log('📱 設定 Instagram 輸入功能...');
+  
+  // Instagram 帳號即時預覽
+  var handleInput = document.getElementById('instagramHandle');
+  if (handleInput) {
+    handleInput.addEventListener('input', function(e) {
+      const value = e.target.value.trim();
+      // 移除 @ 符號（如果用戶輸入了）
+      if (value.startsWith('@')) {
+        e.target.value = value.substring(1);
+      }
+    });
+  }
+  
+  // Instagram 連結自動填充帳號
+  var urlInput = document.getElementById('instagramUrl');
+  if (urlInput) {
+    urlInput.addEventListener('blur', function(e) {
+      const url = e.target.value.trim();
+      const handleInputElement = document.getElementById('instagramHandle');
+      
+      if (url && handleInputElement && !handleInputElement.value) {
+        const match = url.match(/(?:instagram\.com|instagr\.am)\/([^\/\?\#\&]+)/);
+        if (match) {
+          handleInputElement.value = match[1];
+          window.showToast('✅ 已自動填入 Instagram 帳號');
+        }
+      }
+    });
+  }
+  
+  console.log('✅ Instagram 輸入功能設定完成');
+}
 // 收集商品資訊
 function collectProductInfo(formData) {
   // 基本商品資訊
