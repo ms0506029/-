@@ -1,9 +1,9 @@
 // outfit-upload.js
-// EasyStore 穿搭投稿模組
-// Version: 4.0.0
+// EasyStore 穿搭投稿模組 - Google Drive 整合版
+// Version: 4.1.0
 // Dependencies: outfit-common.js
 
-console.log('🚀 開始載入升級版穿搭投稿系統...');
+console.log('🚀 開始載入升級版穿搭投稿系統 (Google Drive 版)...');
 
 var selectedImage = null;
 var selectedAvatar = null;
@@ -43,7 +43,7 @@ function initUploadForm() {
   // 設定表單提交
   setupFormSubmit();
   
-  // === 新增：設定 Instagram 相關事件 ===
+  // 設定 Instagram 相關事件
   setupInstagramInputs();
   
   console.log('✅ 投稿表單初始化完成');
@@ -76,9 +76,6 @@ function updateLoginStatus() {
   console.log('✅ 登入狀態更新完成');
 }
 
-// 在 outfit-upload.js 中，確保這段程式碼正確執行
-
-// 修復圖片上傳點擊事件
 // 設定圖片上傳
 function setupImageUpload() {
   console.log('📷 設定圖片上傳...');
@@ -101,7 +98,7 @@ function setupImageUpload() {
   console.log('✅ 圖片上傳設定完成');
 }
 
-// 設定頭像上傳（修正版）
+// 設定頭像上傳
 function setupAvatarUpload() {
   console.log('👤 設定頭像上傳...');
   
@@ -123,16 +120,7 @@ function setupAvatarUpload() {
   console.log('✅ 頭像上傳設定完成');
 }
 
-// 除錯：檢查元素是否存在
-function debugUploadElements() {
-  console.log('🔍 檢查上傳元素：');
-  console.log('imageUpload:', document.getElementById('imageUpload'));
-  console.log('imageInput:', document.getElementById('imageInput'));
-  console.log('avatarUpload:', document.getElementById('avatarUpload'));
-  console.log('avatarInput:', document.getElementById('avatarInput'));
-}
-
-// 處理頭像選擇（保持 2MB 限制較合理）
+// 處理頭像選擇
 function handleAvatarSelect(file) {
   console.log('👤 處理頭像:', file.name);
   
@@ -161,7 +149,7 @@ function handleAvatarSelect(file) {
   reader.readAsDataURL(file);
 }
 
-// 處理圖片選擇（將限制改為 10MB）
+// 處理圖片選擇
 function handleImageSelect(file) {
   console.log('🖼️ 處理圖片:', file.name);
   
@@ -187,6 +175,138 @@ function handleImageSelect(file) {
     }
   };
   reader.readAsDataURL(file);
+}
+
+// ===== Google Drive 圖片上傳函式 =====
+
+/**
+ * 上傳圖片到 Google Drive
+ */
+function uploadImageToGoogleDrive(file) {
+  return new Promise((resolve, reject) => {
+    console.log('📸 準備上傳圖片到 Google Drive:', file.name);
+    
+    // 檢查檔案大小（建議限制 5MB）
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      reject(new Error('圖片大小不能超過 5MB'));
+      return;
+    }
+    
+    // 使用 FileReader 讀取檔案
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+      const base64Data = e.target.result;
+      
+      // 準備上傳資料
+      const uploadData = {
+        action: 'uploadImage',
+        imageData: {
+          data: base64Data,
+          fileName: file.name,
+          mimeType: file.type
+        }
+      };
+      
+      // 發送到 Google Apps Script
+      fetch(window.OUTFIT_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(uploadData)
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.success) {
+          console.log('✅ 圖片上傳成功:', result.url);
+          resolve(result.url);
+        } else {
+          reject(new Error(result.error || '上傳失敗'));
+        }
+      })
+      .catch(error => {
+        console.error('❌ 上傳請求失敗:', error);
+        reject(error);
+      });
+    };
+    
+    reader.onerror = function() {
+      reject(new Error('讀取檔案失敗'));
+    };
+    
+    // 開始讀取檔案
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * 上傳頭像到 Google Drive（含尺寸壓縮）
+ */
+function uploadAvatarToGoogleDrive(file) {
+  return new Promise((resolve, reject) => {
+    console.log('👤 準備上傳頭像:', file.name);
+    
+    // 建立圖片物件進行尺寸調整
+    const img = new Image();
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+      img.src = e.target.result;
+    };
+    
+    img.onload = function() {
+      // 設定目標尺寸
+      const targetSize = 200; // 200x200 像素
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // 計算裁切區域（保持正方形）
+      const size = Math.min(img.width, img.height);
+      const x = (img.width - size) / 2;
+      const y = (img.height - size) / 2;
+      
+      // 設定 canvas 尺寸
+      canvas.width = targetSize;
+      canvas.height = targetSize;
+      
+      // 繪製並縮放圖片
+      ctx.drawImage(img, x, y, size, size, 0, 0, targetSize, targetSize);
+      
+      // 轉換為 base64
+      const base64Data = canvas.toDataURL('image/jpeg', 0.8); // 0.8 品質
+      
+      // 準備上傳資料
+      const uploadData = {
+        action: 'uploadAvatar',
+        avatarData: {
+          data: base64Data,
+          fileName: 'avatar_' + Date.now() + '.jpg',
+          mimeType: 'image/jpeg'
+        }
+      };
+      
+      // 發送到 Google Apps Script
+      fetch(window.OUTFIT_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(uploadData)
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.success) {
+          console.log('✅ 頭像上傳成功:', result.url);
+          resolve(result.url);
+        } else {
+          reject(new Error(result.error || '上傳失敗'));
+        }
+      })
+      .catch(reject);
+    };
+    
+    img.onerror = function() {
+      reject(new Error('圖片載入失敗'));
+    };
+    
+    reader.readAsDataURL(file);
+  });
 }
 
 // 設定商品資訊輸入切換
@@ -290,9 +410,9 @@ function setupFormSubmit() {
   console.log('✅ 表單提交設定完成');
 }
 
-// 提交穿搭函式（升級版）
+// 提交穿搭函式（使用 Google Drive）
 function submitOutfit() {
-  console.log('🚀 開始提交升級版穿搭...');
+  console.log('🚀 開始提交穿搭（Google Drive 版）...');
   
   if (!window.isLoggedIn) {
     window.showToast('❌ 請先登入會員才能投稿');
@@ -326,7 +446,7 @@ function submitOutfit() {
     submitTime: new Date().toISOString()
   };
   
-  // === 新增：收集 Instagram 資訊 ===
+  // 收集 Instagram 資訊
   var instagramHandle = document.getElementById('instagramHandle').value.trim();
   var instagramUrl = document.getElementById('instagramUrl').value.trim();
   
@@ -355,7 +475,7 @@ function submitOutfit() {
   // 收集商品資訊
   collectProductInfo(formData);
   
-  console.log('📊 升級版表單資料:', formData);
+  console.log('📊 表單資料:', formData);
   
   // 驗證必填欄位
   if (!formData.displayName) {
@@ -376,21 +496,26 @@ function submitOutfit() {
     return;
   }
   
-  // 第一步：上傳圖片和頭像
-  var uploadPromises = [uploadImageToImgur(selectedImage)];
-
+  // 準備上傳圖片
+  var uploadPromises = [];
+  
+  // 上傳主要穿搭照片到 Google Drive
+  submitBtn.textContent = '正在上傳圖片到 Google Drive...';
+  uploadPromises.push(uploadImageToGoogleDrive(selectedImage));
+  
+  // 上傳頭像（如果有）
   if (window.selectedAvatar) {
-    uploadPromises.push(uploadAvatarToService(window.selectedAvatar));
+    uploadPromises.push(uploadAvatarToGoogleDrive(window.selectedAvatar));
   } else {
-    uploadPromises.push(Promise.resolve(''));
+    uploadPromises.push(Promise.resolve('')); // 沒有頭像時返回空字串
   }
-
+  
   Promise.all(uploadPromises)
     .then(function(results) {
       var imageUrl = results[0];
       var avatarUrl = results[1];
-      console.log('📸 圖片處理成功:', imageUrl);
-      console.log('👤 頭像處理成功:', avatarUrl);
+      console.log('📸 圖片上傳完成:', imageUrl);
+      console.log('👤 頭像上傳完成:', avatarUrl);
       
       // 更新進度
       submitBtn.textContent = '處理資料中...';
@@ -438,7 +563,9 @@ function submitOutfit() {
       if (error.message.includes('網路')) {
         errorMessage += '網路連線問題，請檢查網路後重試';
       } else if (error.message.includes('Google')) {
-        errorMessage += 'Google Sheets 連線問題，請稍後再試或聯繫管理員';
+        errorMessage += 'Google 服務連線問題，請稍後再試';
+      } else if (error.message.includes('5MB')) {
+        errorMessage += '圖片檔案過大，請壓縮後再試';
       } else {
         errorMessage += error.message || '未知錯誤，請稍後再試';
       }
@@ -450,6 +577,8 @@ function submitOutfit() {
       resetSubmitButton();
     });
 }
+
+// 設定 Instagram 輸入功能
 function setupInstagramInputs() {
   console.log('📱 設定 Instagram 輸入功能...');
   
@@ -484,6 +613,7 @@ function setupInstagramInputs() {
   
   console.log('✅ Instagram 輸入功能設定完成');
 }
+
 // 收集商品資訊
 function collectProductInfo(formData) {
   // 基本商品資訊
@@ -533,37 +663,6 @@ function collectProductInfo(formData) {
     outer: formData.outerProductInfo,
     shoes: formData.shoesProductInfo,
     accessory: formData.accessoryProductInfo
-  });
-}
-
-// 上傳圖片（暫時使用測試圖片）
-function uploadImageToImgur(file) {
-  return new Promise(function(resolve, reject) {
-    console.log('📸 處理圖片:', file.name);
-    
-    // 目前使用測試圖片 URL，避免 Imgur API 設定問題
-    var testImageUrl = 'https://placehold.jp/400x500/667eea/ffffff?text=穿搭照片_' + Date.now();
-    
-    // 模擬上傳時間
-    setTimeout(function() {
-      console.log('📸 使用測試圖片 URL:', testImageUrl);
-      resolve(testImageUrl);
-    }, 1000);
-  });
-}
-
-// 上傳頭像到服務
-function uploadAvatarToService(file) {
-  return new Promise(function(resolve, reject) {
-    console.log('👤 上傳頭像:', file.name);
-    
-    // 暫時使用測試頭像
-    var testAvatarUrl = 'https://placehold.jp/150x150/667eea/ffffff?text=' + encodeURIComponent('頭像');
-    
-    setTimeout(function() {
-      console.log('👤 使用測試頭像 URL:', testAvatarUrl);
-      resolve(testAvatarUrl);
-    }, 500);
   });
 }
 
@@ -704,11 +803,26 @@ function setupDebug() {
       var formData = {};
       collectProductInfo(formData);
       console.log('🛍️ 測試商品資訊收集:', formData);
+    },
+    testGoogleDriveUpload: function() {
+      console.log('🧪 測試 Google Drive 上傳功能');
+      if (selectedImage) {
+        uploadImageToGoogleDrive(selectedImage)
+          .then(url => console.log('✅ 上傳成功:', url))
+          .catch(err => console.error('❌ 上傳失敗:', err));
+      } else {
+        console.log('❌ 請先選擇圖片');
+      }
     }
   };
   
   console.log('🎯 除錯功能已設定完成');
+  console.log('📌 可用指令：');
+  console.log('- outfitDebug.checkElements() - 檢查頁面元素');
+  console.log('- outfitDebug.testGoogleDriveUpload() - 測試圖片上傳');
+  console.log('- outfitDebug.testProductInfo() - 測試商品資訊收集');
 }
+
 // 確保 DOM 載入完成後執行初始化
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', function() {
@@ -729,3 +843,5 @@ window.addEventListener('load', function() {
     initUploadForm();
   }
 });
+
+console.log('✅ outfit-upload.js (Google Drive 版) 載入完成');
