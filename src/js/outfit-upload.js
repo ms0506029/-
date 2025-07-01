@@ -82,7 +82,6 @@ function updateLoginStatus() {
 function setupImageUpload() {
   console.log('📷 設定圖片上傳...');
   
-  // 使用 setTimeout 確保 DOM 完全載入
   setTimeout(function() {
     var imageUpload = document.getElementById('imageUpload');
     var imageInput = document.getElementById('imageInput');
@@ -92,17 +91,24 @@ function setupImageUpload() {
       return;
     }
     
-    // 直接使用 onclick 而不是 addEventListener
+    // 確保子元素不攔截點擊
+    var children = imageUpload.querySelectorAll('*');
+    children.forEach(function(child) {
+      child.style.pointerEvents = 'none';
+    });
+    
+    // 確保父元素可以點擊
+    imageUpload.style.cursor = 'pointer';
+    
+    // 綁定點擊事件
     imageUpload.onclick = function(e) {
       e.preventDefault();
-      e.stopPropagation();
       console.log('📁 圖片區域被點擊');
       imageInput.click();
     };
     
-    // 設定檔案選擇事件
+    // 檔案選擇事件
     imageInput.onchange = function(e) {
-      console.log('📷 選擇了圖片');
       if (e.target.files && e.target.files.length > 0) {
         handleImageSelect(e.target.files[0]);
       }
