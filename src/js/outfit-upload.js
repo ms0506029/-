@@ -8,17 +8,16 @@ console.log('🚀 開始載入升級版穿搭投稿系統...');
 var selectedImage = null;
 var selectedAvatar = null;
 var isLoggedIn = false;
-var customerInfo = null;
 
-document.addEventListener('DOMContentLoaded', function () {
-  customerInfo = window.customerInfo || null;
-  isLoggedIn = Boolean(customerInfo && customerInfo.id);
+// 使用 window 全域變數檢查登入狀態
+var isLoggedIn = window.isLoggedIn || false;
+var customerInfo = window.customerInfo || null;
 
-  if (isLoggedIn) {
-    console.log('✅ 使用者已登入：', customerInfo.email);
-  } else {
-    console.log('❌ 使用者未登入');
-  }
+if (isLoggedIn) {
+  console.log('✅ 使用者已登入:', customerInfo);
+} else {
+  console.log('❌ 使用者未登入');
+}
 
 
 // 初始化投稿表單
