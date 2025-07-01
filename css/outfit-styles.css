@@ -1282,3 +1282,240 @@
   border-radius: 12px; 
   font-size: 0.8rem;
 }
+/* 新增的樣式 - 加入到 outfit-styles.css */
+
+/* ===== 穿搭卡片優化樣式 ===== */
+.user-info-compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.user-details-compact {
+  flex: 1;
+}
+
+.user-details-compact h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c3e50;
+  line-height: 1.2;
+}
+
+.instagram-handle {
+  margin: 4px 0 0 0;
+  font-size: 0.8rem;
+  color: #7f8c8d;
+  font-weight: 400;
+}
+
+/* 自定義頭像樣式 */
+.user-avatar.custom-avatar {
+  background-color: transparent !important;
+  font-size: 0;
+}
+
+/* 留言預覽樣式 */
+.outfit-comment-preview {
+  padding: 10px 0;
+  font-size: 0.85rem;
+  color: #555;
+  line-height: 1.5;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* 商品標誌 */
+.product-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+/* ===== 模態框優化樣式 ===== */
+
+/* Instagram 資訊樣式 */
+.instagram-info-modal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.instagram-icon {
+  width: 14px;
+  height: 14px;
+  color: #c13584;
+  flex-shrink: 0;
+}
+
+.instagram-link {
+  color: #7f8c8d;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.instagram-link:hover {
+  color: #c13584;
+}
+
+/* 突出留言區域 */
+.modal-comment.comment-highlight,
+.comment-highlight {
+  background: linear-gradient(to right, #f8f9fa 0%, #fff 100%);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+  border-left: 4px solid #667eea;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #2c3e50;
+}
+
+/* 突出商品資訊區域 */
+.modal-products.products-highlight,
+.products-highlight {
+  background: #fff;
+  padding: 25px;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  margin: 25px 0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.products-highlight h4 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 商品項目樣式優化 */
+.product-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.product-item:last-child {
+  border-bottom: none;
+}
+
+.product-label {
+  font-weight: 600;
+  color: #2c3e50;
+  min-width: 80px;
+}
+
+.product-info {
+  flex: 1;
+  margin: 0 15px;
+}
+
+.product-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.product-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.product-want-btn {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  padding: 6px 14px;
+  border-radius: 18px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.product-want-btn:hover {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+  transform: translateY(-1px);
+}
+
+.product-want-btn.clicked {
+  background: #27ae60;
+  color: white;
+  border-color: #27ae60;
+}
+
+/* 需求統計優化 */
+.modal-demand {
+  background: #fafbfc;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.modal-demand h4 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.demand-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 0.9rem;
+}
+
+.demand-count {
+  background: #667eea;
+  color: white;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* 簡化的尺寸顯示（可選） */
+.size-info-simple {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-size: 0.9rem;
+}
+
+.size-info-simple .size-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.size-info-simple .size-label {
+  color: #7f8c8d;
+}
+
+.size-info-simple .size-value {
+  font-weight: 600;
+  color: #2c3e50;
+}
