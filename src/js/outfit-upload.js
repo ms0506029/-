@@ -7,20 +7,17 @@ console.log('🚀 開始載入升級版穿搭投稿系統...');
 
 var selectedImage = null;
 var selectedAvatar = null;
-// 移除這裡的 isLoggedIn 宣告，避免重複
+// ❌ 刪除所有 isLoggedIn 的本地變數宣告
 
-// 等待 DOM 載入完成後再檢查登入狀態
+// ✅ 直接檢查 window.isLoggedIn
+if (window.isLoggedIn) {
+  console.log('✅ 使用者已登入:', window.customerInfo);
+} else {
+  console.log('❌ 使用者未登入');
+}
+
+// 等待 DOM 載入完成後再初始化
 document.addEventListener('DOMContentLoaded', function() {
-  // 使用 window 全域變數檢查登入狀態
-  var isLoggedIn = window.isLoggedIn || false;
-  var customerInfo = window.customerInfo || null;
-
-  if (isLoggedIn) {
-    console.log('✅ 使用者已登入:', customerInfo);
-  } else {
-    console.log('❌ 使用者未登入');
-  }
-
   // 初始化投稿表單
   initUploadForm();
   
@@ -30,6 +27,41 @@ document.addEventListener('DOMContentLoaded', function() {
   // 設定商品資訊切換功能
   setupProductInputs();
 });
+
+// 其他函數中統一使用 window.isLoggedIn
+function updateLoginStatus() {
+  console.log('🔄 更新登入狀態...');
+  
+  var memberStatus = document.getElementById('memberStatus');
+  if (!memberStatus) {
+    console.warn('⚠️ 找不到 memberStatus 元素');
+    return;
+  }
+  
+  if (window.isLoggedIn) {  // 使用 window.isLoggedIn
+    memberStatus.innerHTML = '<strong>歡迎！</strong> 準備分享你的穿搭吧！';
+    memberStatus.className = 'welcome-message';
+    
+    var displayNameInput = document.getElementById('displayName');
+    if (displayNameInput && window.customerInfo && window.customerInfo.name) {
+      displayNameInput.value = window.customerInfo.name;
+    }
+  } else {
+    memberStatus.innerHTML = '<strong>提醒：</strong> 需要先 <a href="/account/login?return_to=' + encodeURIComponent(window.location.href) + '">登入會員</a> 才能投稿穿搭照片';
+    memberStatus.className = 'login-prompt';
+  }
+}
+
+function submitOutfit() {
+  console.log('🚀 開始提交升級版穿搭...');
+  
+  if (!window.isLoggedIn) {  // 使用 window.isLoggedIn
+    window.showToast('❌ 請先登入會員才能投稿');
+    setTimeout(() => {
+      window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
+    }, 1500);
+    return;
+  }
 
 
 // 初始化投稿表單
@@ -635,7 +667,7 @@ function resetProductInputs() {
 // 設定除錯功能
 function setupDebug() {
   window.outfitDebug = {
-    isLoggedIn: isLoggedIn,
+    isLoggedIn: window.isLoggedIn,  // 使用 window.isLoggedIn
     selectedImage: selectedImage,
     checkElements: function() {
       console.log('🔍 檢查元素:');
