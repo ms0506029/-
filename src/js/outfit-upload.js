@@ -10,12 +10,13 @@ var selectedImage = null;
 var selectedAvatar = null;
 var isLoggedIn = false;
 
-// 檢查登入狀態（需要在 EasyStore 端設定）
-if (typeof customer !== 'undefined' && customer) {
-  isLoggedIn = true;
-  console.log('✅ 使用者已登入');
+// 使用 window 全域變數檢查登入狀態
+var isLoggedIn = window.isLoggedIn || false;
+var customerInfo = window.customerInfo || null;
+
+if (isLoggedIn) {
+  console.log('✅ 使用者已登入:', customerInfo);
 } else {
-  isLoggedIn = false;
   console.log('❌ 使用者未登入');
 }
 
