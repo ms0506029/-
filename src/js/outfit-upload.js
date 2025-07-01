@@ -28,16 +28,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
-  
-  // 初始化投稿表單
-  initUploadForm();
-  
-  // 設定除錯功能
-  setupDebug();
-  
-  // 設定商品資訊切換功能
-  setupProductInputs();
-});
 
 // 初始化投稿表單
 function initUploadForm() {
