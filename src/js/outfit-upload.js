@@ -13,12 +13,26 @@ var isLoggedIn = false;
 
 
 // 等待頁面完全載入
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   console.log('📄 頁面載入完成，開始初始化...');
-  // 使用 window 全域變數檢查登入狀態
+
   var isLoggedIn = window.isLoggedIn === true;
   var customerInfo = window.customerInfo || null;
-  
+
+  const memberStatusDiv = document.getElementById('memberStatus');
+  if (memberStatusDiv) {
+    if (isLoggedIn) {
+      // ✅ 使用者已登入，隱藏提示
+      memberStatusDiv.style.display = 'none';
+    } else {
+      // ❌ 使用者未登入，顯示提示
+      memberStatusDiv.innerHTML = `
+        <div class="alert alert-warning" style="background-color: #fff6d8; color: #8b5c00; padding: 12px; border-radius: 8px;">
+          <strong>提醒：</strong> 需要先 <a href="/account/login" style="color: #8b5c00; font-weight: bold;">登入會員</a> 才能投稿穿搭照片
+        </div>`;
+    }
+  }
+
   if (isLoggedIn) {
     console.log('✅ 使用者已登入:', customerInfo);
   } else {
