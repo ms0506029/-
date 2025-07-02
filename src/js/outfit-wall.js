@@ -12,9 +12,6 @@
   let outfitData = [];
   let currentModal = null;
   
-  // 新增：將內部變數同步到全域（方便除錯）
-  window.outfitData = outfitData;
-  window.currentModal = currentModal;
   
   // 新增：按鈕點擊反饋函式
   function addRippleEffect(element) {
