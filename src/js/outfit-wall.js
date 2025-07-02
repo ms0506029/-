@@ -533,8 +533,9 @@ if (modalUserInfo) {
       const submitTime = outfit['投稿時間'] || '';
       const status = outfit['審核狀態'] || '';
       const instagramUrl = outfit['Instagram連結'] || '';
-      const avatarUrl = outfit['自訂頭像'] || ''; // 新增：自定義頭像
+
       
+      console.log('卡片 ' + i + ' 頭像URL:', avatarUrl);
       console.log('處理投稿 ' + (i+1) + ':', name, '狀態:', status);
       
       // 確保只顯示已通過的
