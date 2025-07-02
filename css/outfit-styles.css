@@ -1608,3 +1608,12 @@
   pointer-events: auto !important;
   position: relative !important;
 }
+
+.admin-btn-delete {
+  background: #e74c3c !important;
+  color: white;
+}
+
+.admin-btn-delete:hover {
+  background: #c0392b !important;
+}
