@@ -199,6 +199,7 @@
           bottomSize: item['下身尺寸'],
           comment: item['穿搭心得'],
           imageUrl: item['圖片網址'],
+          avatarUrl: item['自訂頭像'] || '',
           instagramUrl: item['Instagram連結'] || '',
           submitTime: item['投稿時間'],
           status: item['審核狀態'] === '已通過' ? 'approved' : 
@@ -303,13 +304,32 @@
           
           <div style="padding: 15px;">
             <div style="display: flex; align-items: center; margin-bottom: 10px;">
-              <div style="
-                width: 30px; height: 30px; border-radius: 50%; 
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                display: flex; align-items: center; justify-content: center;
-                color: white; font-weight: bold; margin-right: 10px; font-size: 0.8rem;
-              ">${item.displayName.charAt(0)}</div>
-              <div>
+              ${item.avatarUrl && item.avatarUrl.startsWith('http') ? `
+                <div style="
+                  width: 30px; 
+                  height: 30px; 
+                  border-radius: 50%;
+                  background-image: url('${item.avatarUrl}');
+                  background-size: cover;
+                  background-position: center;
+                  margin-right: 10px;
+                  display: block;
+                "></div>
+              ` : `
+                <div style="
+                  width: 30px; 
+                  height: 30px; 
+                  border-radius: 50%; 
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  display: flex; 
+                  align-items: center; 
+                  justify-content: center;
+                  color: white; 
+                  font-weight: bold; 
+                  margin-right: 10px; 
+                  font-size: 0.8rem;
+                ">${item.displayName.charAt(0)}</div>
+              `}
                 <h4 style="color: #2c3e50; margin: 0; font-size: 1rem;">${item.displayName}</h4>
                 <p style="color: #7f8c8d; font-size: 0.8rem; margin: 0;">
                   身高: ${item.height}cm ${item.memberEmail ? '| ' + item.memberEmail : ''}
