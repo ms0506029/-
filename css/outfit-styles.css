@@ -1550,13 +1550,23 @@
   color: #2c3e50;
 }
 /* 確保上傳區域內的元素不攔截點擊 */
-#imageUpload > *,
-#avatarUpload > * {
+#imageUpload > *:not(input),
+#avatarUpload > *:not(input) {
   pointer-events: none !important;
 }
 
+/* 確保 input 元素可以點擊 */
+#imageUpload input[type="file"],
+#avatarUpload input[type="file"] {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 999 !important;
+}
+
+/* 確保容器本身也可以點擊 */
 #imageUpload,
 #avatarUpload {
   cursor: pointer !important;
   pointer-events: auto !important;
+  position: relative !important;
 }
