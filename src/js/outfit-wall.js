@@ -12,6 +12,8 @@
   window.outfitData = [];
   window.currentModal = null;
   
+  window.outfitData = outfitData;
+  
   // 新增：按鈕點擊反饋函式
   function addRippleEffect(element) {
     element.classList.add('ripple-effect');
