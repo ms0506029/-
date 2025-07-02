@@ -533,9 +533,8 @@ if (modalUserInfo) {
       const submitTime = outfit['投稿時間'] || '';
       const status = outfit['審核狀態'] || '';
       const instagramUrl = outfit['Instagram連結'] || '';
-
-      
-      console.log('卡片 ' + i + ' 頭像URL:', avatarUrl);
+      const avatarUrl = outfit['自訂頭像'] || ''; // 確保在這裡宣告
+    
       console.log('處理投稿 ' + (i+1) + ':', name, '狀態:', status);
       
       // 確保只顯示已通過的
@@ -543,6 +542,8 @@ if (modalUserInfo) {
         console.log('跳過非已通過投稿:', name, status);
         continue;
       }
+
+  
       
       // 從 Instagram URL 提取用戶名
       let instagramUsername = '';
@@ -559,9 +560,7 @@ if (modalUserInfo) {
       // 新的用戶資訊佈局
       card += '<div class="user-info-compact">';
       
-     
-      // 使用自定義頭像或預設頭像
-      const avatarUrl = outfit['自訂頭像'] || '';
+    
       // 加入除錯
       console.log('卡片 ' + i + ' 頭像URL:', avatarUrl);
       if (avatarUrl && avatarUrl.startsWith('http')) {
