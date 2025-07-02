@@ -564,9 +564,11 @@ if (modalUserInfo) {
       // 加入除錯
       console.log('卡片 ' + i + ' 頭像URL:', avatarUrl);
       if (avatarUrl && avatarUrl.startsWith('http')) {
-        card += '<div class="user-avatar custom-avatar" style="background-image: url(\'' + avatarUrl + '\'); background-size: cover; background-position: center;"></div>';
+        // 自訂頭像 - 加入 width 和 height
+        card += '<div class="user-avatar custom-avatar" style="width: 40px; height: 40px; background-image: url(\'' + avatarUrl + '\'); background-size: cover; background-position: center;"></div>';
       } else {
-        card += '<div class="user-avatar">' + name.charAt(0) + '</div>';
+        // 預設頭像 - 也加入 width 和 height 確保一致性
+        card += '<div class="user-avatar" style="width: 40px; height: 40px;">' + name.charAt(0) + '</div>';
       }
       
       card += '<div class="user-details-compact">';
