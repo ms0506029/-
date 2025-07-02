@@ -564,10 +564,10 @@ if (modalUserInfo) {
       // 加入除錯
       console.log('卡片 ' + i + ' 頭像URL:', avatarUrl);
       if (avatarUrl && avatarUrl.startsWith('http')) {
-        // 自訂頭像 - 加入 width 和 height
-        card += '<div class="user-avatar custom-avatar" style="width: 40px; height: 40px; background-image: url(\'' + avatarUrl + '\'); background-size: cover; background-position: center;"></div>';
+        card += '<div class="user-avatar custom-avatar" style="width: 40px; height: 40px; padding: 0; overflow: hidden;">';
+        card += '<img src="' + avatarUrl + '" style="width: 100%; height: 100%; object-fit: cover;" alt="頭像">';
+        card += '</div>';
       } else {
-        // 預設頭像 - 也加入 width 和 height 確保一致性
         card += '<div class="user-avatar" style="width: 40px; height: 40px;">' + name.charAt(0) + '</div>';
       }
       
