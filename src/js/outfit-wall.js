@@ -556,6 +556,7 @@ if (modalUserInfo) {
       // 新的用戶資訊佈局
       card += '<div class="user-info-compact">';
       
+     
       // 使用自定義頭像或預設頭像
       if (avatarUrl && avatarUrl.startsWith('http')) {
         card += '<div class="user-avatar custom-avatar" style="background-image: url(\'' + avatarUrl + '\'); background-size: cover; background-position: center;"></div>';
