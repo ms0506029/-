@@ -174,8 +174,9 @@ function handleAvatarSelect(file) {
   reader.onload = function(e) {
     var avatarPreview = document.getElementById('avatarPreview');
     if (avatarPreview) {
-      // 清除原本的內容並顯示圖片
-      avatarPreview.innerHTML = '<img src="' + e.target.result + '" alt="頭像預覽" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">';
+      // 添加 has-image 類別並顯示圖片
+      avatarPreview.classList.add('has-image');
+      avatarPreview.innerHTML = '<img src="' + e.target.result + '" alt="頭像預覽">';
     }
   };
   reader.readAsDataURL(file);
