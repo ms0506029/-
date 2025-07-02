@@ -537,7 +537,7 @@ function submitOutfit() {
   
   // 上傳頭像（如果有）
   if (window.selectedAvatar) {
-    uploadPromises.push(uploadAvatarToGoogleDrive(window.selectedAvatar));
+    uploadPromises.push(uploadImageToGoogleDrive(window.selectedAvatar));
   } else {
     uploadPromises.push(Promise.resolve('')); // 沒有頭像時返回空字串
   }
