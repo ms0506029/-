@@ -1332,10 +1332,27 @@
   font-weight: 400;
 }
 
+/* 基本頭像樣式 */
+.user-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  margin-right: 10px;
+  flex-shrink: 0; /* 防止被壓縮 */
+}
+
 /* 自定義頭像樣式 */
 .user-avatar.custom-avatar {
-  background-color: transparent !important;
-  font-size: 0;
+  background: transparent !important;
+  font-size: 0 !important;
 }
 
 /* 留言預覽樣式 */
