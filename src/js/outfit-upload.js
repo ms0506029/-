@@ -86,12 +86,28 @@ function setupImageUpload() {
     console.error('❌ 找不到圖片上傳元素');
     return;
   }
+
+  // 確保 CSS 不會干擾
+  imageUpload.style.cursor = 'pointer';
+  imageUpload.style.pointerEvents = 'auto';
+  imageInput.style.pointerEvents = 'auto';
+  imageInput.style.cursor = 'pointer';
   
-  // 直接使用 onchange 事件
+  // 方法 1：直接綁定 onchange
   imageInput.onchange = function(e) {
     console.log('📷 圖片檔案選擇變更');
     if (e.target.files && e.target.files.length > 0) {
       handleImageSelect(e.target.files[0]);
+    }
+  };
+  
+  // 方法 2：同時綁定容器的點擊事件（備用）
+  imageUpload.onclick = function(e) {
+    // 如果點擊的不是 input 本身
+    if (e.target !== imageInput) {
+      e.preventDefault();
+      e.stopPropagation();
+      imageInput.click();
     }
   };
   
@@ -109,11 +125,27 @@ function setupAvatarUpload() {
     return;
   }
   
-  // 直接使用 onchange 事件
+
+  // 確保 CSS 不會干擾
+  avatarUpload.style.cursor = 'pointer';
+  avatarUpload.style.pointerEvents = 'auto';
+  avatarInput.style.pointerEvents = 'auto';
+  avatarInput.style.cursor = 'pointer';
+  
+  // 方法 1：直接綁定 onchange
   avatarInput.onchange = function(e) {
     console.log('👤 頭像檔案選擇變更');
     if (e.target.files && e.target.files.length > 0) {
       handleAvatarSelect(e.target.files[0]);
+    }
+  };
+  
+  // 方法 2：同時綁定容器的點擊事件（備用）
+  avatarUpload.onclick = function(e) {
+    if (e.target !== avatarInput) {
+      e.preventDefault();
+      e.stopPropagation();
+      avatarInput.click();
     }
   };
   
