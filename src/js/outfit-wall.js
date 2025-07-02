@@ -641,5 +641,17 @@ if (modalUserInfo) {
   } else {
     initOutfitWall();
   }
+// 設定全域函數
+  window.loadApprovedOutfits = loadApprovedOutfits;
+  window.displayOutfits = displayOutfits;
+  window.showNoOutfits = showNoOutfits;
+  window.showError = showError;
+  window.openModal = openModal;
+  window.closeModal = closeModal;
+  window.likeOutfit = likeOutfit;
+  window.referenceOutfit = referenceOutfit;
+  window.purchaseOutfit = purchaseOutfit;
+  window.currentModal = currentModal;
+
 
 })();
