@@ -371,6 +371,7 @@
             <div style="display: flex; gap: 8px; margin-top: 8px;">
               <button onclick="adminViewDetail('${item.id}')" class="admin-btn admin-btn-secondary" style="flex: 1;">詳細檢視</button>
               <button onclick="adminEditProduct('${item.id}')" class="admin-btn admin-btn-secondary" style="flex: 1;">編輯商品</button>
+              <button onclick="adminDeleteSubmission('${item.id}')" class="admin-btn admin-btn-reject" style="flex: 1;">刪除投稿</button>
             </div>
           </div>
         </div>
@@ -713,5 +714,62 @@
       }
     }
   });
-
+  // 刪除投稿
+  window.adminDeleteSubmission = async function(id) {
+    // 確認對話框
+    const submission = window.adminSubmissions.find(x => x.id === id);
+    if (!submission) {
+      window.showToast('❌ 找不到該投稿');
+      return;
+    }
+    
+    const confirmMessage = `確定要永久刪除「${submission.displayName}」的投稿嗎？\n\n此操作無法復原！`;
+    
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+    
+    // 二次確認（重要操作）
+    if (!confirm('再次確認：真的要刪除這個投稿嗎？')) {
+      return;
+    }
+    
+    const button = event.target;
+    button.disabled = true;
+    button.textContent = '刪除中...';
+    
+    try {
+      const response = await fetch(window.OUTFIT_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'deleteSubmission',
+          submissionId: id
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // 從本地資料中移除
+        window.adminSubmissions = window.adminSubmissions.filter(x => x.id !== id);
+        
+        // 更新統計
+        adminUpdateStats();
+        
+        // 重新渲染
+        adminApplyFilters();
+        
+        window.showToast('✅ 投稿已成功刪除');
+      } else {
+        throw new Error(result.error || '刪除失敗');
+      }
+    } catch (error) {
+      console.error('刪除投稿失敗:', error);
+      window.showToast('❌ 刪除失敗：' + error.message);
+      
+      // 恢復按鈕
+      button.disabled = false;
+      button.textContent = '刪除投稿';
+    }
+  };
 })();
