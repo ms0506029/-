@@ -73,7 +73,7 @@
 .outfit-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 30px 20px;
+  padding: 40px 30px;  /* 原本是 30px 20px，增加左右內距 */
 }
 
 .outfit-grid {
