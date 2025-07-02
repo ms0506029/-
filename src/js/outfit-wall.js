@@ -9,8 +9,8 @@
   console.log('🚀 穿搭牆模組 v4.0 載入中...');
   
   // 儲存穿搭資料和當前模態框資料
-  let outfitData = [];
-  let currentModal = null;
+  window.outfitData = [];
+  window.currentModal = null;
   
   // 新增：按鈕點擊反饋函式
   function addRippleEffect(element) {
