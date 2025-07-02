@@ -496,8 +496,7 @@ if (modalUserInfo) {
           if (result.data && result.data.length > 0) {
             console.log('✅ 找到 ' + result.data.length + ' 個已通過的穿搭');
             outfitData = result.data;
-            // 新增：同步到全域變數
-            window.outfitData = outfitData;
+            
             displayOutfits(result.data);
           } else {
             console.log('ℹ️ 沒有找到已通過的穿搭');
