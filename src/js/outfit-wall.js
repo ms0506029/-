@@ -497,6 +497,8 @@ if (modalUserInfo) {
           if (result.data && result.data.length > 0) {
             console.log('✅ 找到 ' + result.data.length + ' 個已通過的穿搭');
             outfitData = result.data;
+            // 新增：同步到全域變數
+            window.outfitData = outfitData;
             displayOutfits(result.data);
           } else {
             console.log('ℹ️ 沒有找到已通過的穿搭');
@@ -560,6 +562,9 @@ if (modalUserInfo) {
       
      
       // 使用自定義頭像或預設頭像
+      const avatarUrl = outfit['自訂頭像'] || '';
+      // 加入除錯
+      console.log('卡片 ' + i + ' 頭像URL:', avatarUrl);
       if (avatarUrl && avatarUrl.startsWith('http')) {
         card += '<div class="user-avatar custom-avatar" style="background-image: url(\'' + avatarUrl + '\'); background-size: cover; background-position: center;"></div>';
       } else {
