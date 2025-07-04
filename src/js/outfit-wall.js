@@ -295,11 +295,7 @@ if (modalUserInfo) {
       modalSocial.style.display = 'none';
     }
     
-    // 重置所有按鈕狀態
-    const actionBtns = modal.querySelectorAll('.action-btn');
-    actionBtns.forEach(btn => {
-      btn.classList.remove('liked', 'referenced', 'purchased');
-    });
+   
   
     // 重置計數顯示
     const purchaseCountElement = document.getElementById('modalPurchaseCount');
@@ -612,7 +608,8 @@ if (modalUserInfo) {
       });
   }
   
-  // 顯示穿搭列表（升級版）
+  
+  // 顯示穿搭列表（修正版）
   function displayOutfits(outfits) {
     const grid = document.getElementById('outfitGrid');
     if (!grid) return;
@@ -631,9 +628,17 @@ if (modalUserInfo) {
       const submitTime = outfit['投稿時間'] || '';
       const status = outfit['審核狀態'] || '';
       const instagramUrl = outfit['Instagram連結'] || '';
-      const avatarUrl = outfit['自訂頭像'] || ''; // 確保在這裡宣告
-
-      / 讀取實際的計數
+      const avatarUrl = outfit['自訂頭像'] || '';
+  
+      console.log('處理投稿 ' + (i+1) + ':', name, '狀態:', status);
+      
+      // 確保只顯示已通過的
+      if (status !== '已通過') {
+        console.log('跳過非已通過投稿:', name, status);
+        continue;
+      }
+  
+      // 讀取實際的計數
       const loveCount = outfit['按讚數'] || 0;
       const refCount = outfit['參考數'] || 0;
       const purchaseCount = outfit['購買數'] || 0;
@@ -643,34 +648,23 @@ if (modalUserInfo) {
       const hasLiked = userInteractions[outfitId]?.like || false;
       const hasReferenced = userInteractions[outfitId]?.reference || false;
       const hasPurchased = userInteractions[outfitId]?.purchase || false;
-    
-      console.log('處理投稿 ' + (i+1) + ':', name, '狀態:', status);
-      
-      // 確保只顯示已通過的
-      if (status !== '已通過') {
-        console.log('跳過非已通過投稿:', name, status);
-        continue;
-      }
-
-  
       
       // 從 Instagram URL 提取用戶名
       let instagramUsername = '';
       if (instagramUrl) {
-        // 支援多種 Instagram URL 格式
         const match = instagramUrl.match(/(?:instagram\.com|instagr\.am)\/([^\/\?\#\&]+)/);
         instagramUsername = match ? match[1] : '';
       }
       
+      // 開始建立卡片
       let card = '<div class="outfit-card" onclick="openModal(' + i + ')" style="cursor: pointer;">';
       card += '<img src="' + imageUrl + '" alt="' + name + ' 的穿搭" class="outfit-image" onerror="this.src=\'https://placehold.jp/300x350/f8f9fa/333333?text=圖片載入失敗\'">';
       card += '<div class="outfit-info">';
       
-      // 新的用戶資訊佈局
+      // 用戶資訊區塊
       card += '<div class="user-info-compact">';
       
-    
-      // 加入除錯
+      // 頭像
       console.log('卡片 ' + i + ' 頭像URL:', avatarUrl);
       if (avatarUrl && avatarUrl.startsWith('http')) {
         card += '<div class="user-avatar custom-avatar" style="width: 40px; height: 40px; padding: 0; overflow: hidden;">';
@@ -680,20 +674,31 @@ if (modalUserInfo) {
         card += '<div class="user-avatar" style="width: 40px; height: 40px;">' + name.charAt(0) + '</div>';
       }
       
+      // 用戶詳細資訊
       card += '<div class="user-details-compact">';
-      // 身高體重整合在名字旁
       card += '<h3>' + name + ' / ' + height + 'cm';
       if (weight) card += ' / ' + weight + 'kg';
       card += '</h3>';
       
-      // Instagram 顯示在名字下方（如果有）
+      // Instagram 顯示
       if (instagramUsername) {
         card += '<p class="instagram-handle">@' + instagramUsername + '</p>';
       }
-
-      const loveCount = outfit['按讚數'] || 0;
-      const refCount = outfit['參考數'] || 0;
-      const purchaseCount = outfit['購買數'] || 0;
+      card += '</div>'; // 關閉 user-details-compact
+      
+      card += '</div>'; // 關閉 user-info-compact
+      
+      // 留言預覽
+      if (comment) {
+        const shortComment = comment.length > 60 ? comment.substring(0, 60) + '...' : comment;
+        card += '<div class="outfit-comment-preview">' + shortComment + '</div>';
+      }
+      
+      // 商品資訊標誌
+      const hasProducts = outfit['上衣商品資訊'] || outfit['下身商品資訊'] || outfit['外套商品資訊'] || outfit['鞋子商品資訊'] || outfit['配件商品資訊'];
+      if (hasProducts) {
+        card += '<div class="product-badge">🛍️ 含商品資訊</div>';
+      }
       
       // 手機端互動按鈕
       card += `
@@ -721,23 +726,9 @@ if (modalUserInfo) {
           </button>
         </div>
       `;
-      card += '</div></div>';
-      cards.push(card);
-    }
       
-      // 簡化的留言預覽
-      if (comment) {
-        const shortComment = comment.length > 60 ? comment.substring(0, 60) + '...' : comment;
-        card += '<div class="outfit-comment-preview">' + shortComment + '</div>';
-      }
-      
-      // 商品資訊預覽標誌
-      const hasProducts = outfit['上衣商品資訊'] || outfit['下身商品資訊'] || outfit['外套商品資訊'] || outfit['鞋子商品資訊'] || outfit['配件商品資訊'];
-      if (hasProducts) {
-        card += '<div class="product-badge">🛍️ 含商品資訊</div>';
-      }
-      
-      card += '</div></div>';
+      card += '</div>'; // 關閉 outfit-info
+      card += '</div>'; // 關閉 outfit-card
       
       cards.push(card);
     }
@@ -995,6 +986,37 @@ function saveInteraction(index, interactionType, newCount) {
   .catch(error => {
     console.error('保存互動失敗:', error);
     window.showToast('❌ 網路錯誤，互動可能未保存');
+  });
+}
+
+// 在檔案結尾，})(); 之前加入：
+
+// 更新模態框中的計數
+function updateModalCounts(outfit) {
+  const modalLoveCount = document.getElementById('modalLoveCount');
+  const modalRefCount = document.getElementById('modalRefCount');
+  const modalPurchaseCount = document.getElementById('modalPurchaseCount');
+  
+  if (modalLoveCount) modalLoveCount.textContent = outfit['按讚數'] || 0;
+  if (modalRefCount) modalRefCount.textContent = outfit['參考數'] || 0;
+  if (modalPurchaseCount) modalPurchaseCount.textContent = outfit['購買數'] || 0;
+}
+
+// 更新所有互動按鈕狀態
+function updateAllInteractionButtons() {
+  // 更新手機端按鈕
+  document.querySelectorAll('.action-btn-mobile').forEach(button => {
+    const outfitId = button.getAttribute('data-outfit-id');
+    const interactionType = button.getAttribute('data-interaction-type');
+    
+    if (userInteractions[outfitId] && userInteractions[outfitId][interactionType]) {
+      const classMap = {
+        'like': 'liked',
+        'reference': 'referenced',
+        'purchase': 'purchased'
+      };
+      button.classList.add(classMap[interactionType]);
+    }
   });
 }
 })();
