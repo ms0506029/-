@@ -81,6 +81,9 @@
         alert('除錯資訊：\n\n' + JSON.stringify(info, null, 2));
       });
     }
+      if (window.isLoggedIn && window.customerInfo && window.customerInfo.email) {
+      loadUserInteractions(window.customerInfo.email);
+    }
     
     // 設定模態框功能
     setupModal();
@@ -91,6 +94,31 @@
       loadApprovedOutfits();
     }, 1000);
   }
+  function loadUserInteractions(memberEmail) {
+    console.log('載入用戶互動記錄:', memberEmail);
+    isLoadingInteractions = true;
+    
+    fetch(`${window.OUTFIT_SCRIPT_URL}?action=getUserInteractions&memberEmail=${encodeURIComponent(memberEmail)}`)
+      .then(response => response.json())
+      .then(result => {
+        if (result.success) {
+          userInteractions = result.interactions || {};
+          console.log('用戶互動記錄:', userInteractions);
+          
+          // 如果穿搭已經載入，更新按鈕狀態
+          if (outfitData.length > 0) {
+            updateAllInteractionButtons();
+          }
+        }
+      })
+      .catch(error => {
+        console.error('載入互動記錄失敗:', error);
+      })
+      .finally(() => {
+        isLoadingInteractions = false;
+      });
+  }
+
   
   // 設定模態框功能
   function setupModal() {
@@ -146,6 +174,30 @@
     const submitTime = outfit['投稿時間'] || '';
     const instagramUrl = outfit['Instagram連結'] || '';
     const avatarUrl = outfit['自訂頭像'] || ''; // 新增：自定義頭像
+
+    // 更新計數顯示
+    const modalLoveCount = document.getElementById('modalLoveCount');
+    const modalRefCount = document.getElementById('modalRefCount');
+    const modalPurchaseCount = document.getElementById('modalPurchaseCount');
+    
+    if (modalLoveCount) modalLoveCount.textContent = outfit['按讚數'] || 0;
+    if (modalRefCount) modalRefCount.textContent = outfit['參考數'] || 0;
+    if (modalPurchaseCount) modalPurchaseCount.textContent = outfit['購買數'] || 0;
+    
+    // 更新按鈕狀態
+    const outfitId = outfit['投稿ID'];
+    const actionBtns = modal.querySelectorAll('.action-btn');
+    
+    actionBtns.forEach(btn => {
+      const action = btn.getAttribute('data-action');
+      if (action === 'like' && userInteractions[outfitId]?.like) {
+        btn.classList.add('liked');
+      } else if (action === 'reference' && userInteractions[outfitId]?.reference) {
+        btn.classList.add('referenced');
+      } else if (action === 'purchase' && userInteractions[outfitId]?.purchase) {
+        btn.classList.add('purchased');
+      }
+    });
     
     // 提取 Instagram 用戶名
     let instagramUsername = '';
@@ -401,73 +453,116 @@ if (modalUserInfo) {
     }
   }
   
+  
   // 互動功能（升級版帶反饋）
   function likeOutfit(index) {
     const countElement = document.getElementById('modalLoveCount');
     const buttonElement = event.target.closest('.action-btn');
-
+  
+    // 🔴 新增：檢查登入狀態
+    if (!window.isLoggedIn || !window.customerInfo || !window.customerInfo.email) {
+      window.showToast('❌ 請先登入會員才能互動');
+      setTimeout(() => {
+        window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
+      }, 1500);
+      return;
+    }
+  
+    // 🔴 新增：檢查是否已經互動過
+    const outfit = outfitData[index];
+    const outfitId = outfit['投稿ID'];
+    if (userInteractions[outfitId] && userInteractions[outfitId]['like']) {
+      window.showToast('ℹ️ 您已經按過愛心了');
+      return;
+    }
+  
     if (countElement && buttonElement) {
       window.addButtonFeedback(buttonElement);
       
       let currentCount = parseInt(countElement.textContent) || 0;
-
-      if (buttonElement.classList.contains('liked')) {
-        currentCount = Math.max(0, currentCount - 1);
-        countElement.textContent = currentCount;
-        buttonElement.classList.remove('liked');
-        window.showToast('💔 已取消按讚');
-      } else {
-        currentCount += 1;
-        countElement.textContent = currentCount;
-        buttonElement.classList.add('liked');
-        window.showToast('❤️ 已按讚！');
-      }
+      
+      // 🔴 修改：只能增加，不能減少
+      currentCount += 1;
+      countElement.textContent = currentCount;
+      buttonElement.classList.add('liked');
+      window.showToast('❤️ 已按讚！');
+      
+      // 🔴 新增：呼叫保存函數
+      saveInteraction(index, 'like', currentCount);
     }
   }
 
   function referenceOutfit(index) {
     const countElement = document.getElementById('modalRefCount');
     const buttonElement = event.target.closest('.action-btn');
-
+  
+    // 🔴 新增：檢查登入狀態
+    if (!window.isLoggedIn || !window.customerInfo || !window.customerInfo.email) {
+      window.showToast('❌ 請先登入會員才能互動');
+      setTimeout(() => {
+        window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
+      }, 1500);
+      return;
+    }
+  
+    // 🔴 新增：檢查是否已經互動過
+    const outfit = outfitData[index];
+    const outfitId = outfit['投稿ID'];
+    if (userInteractions[outfitId] && userInteractions[outfitId]['reference']) {
+      window.showToast('ℹ️ 您已經標記過參考了');
+      return;
+    }
+  
     if (countElement && buttonElement) {
       window.addButtonFeedback(buttonElement);
       
       let currentCount = parseInt(countElement.textContent) || 0;
-
-      if (buttonElement.classList.contains('referenced')) {
-        currentCount = Math.max(0, currentCount - 1);
-        countElement.textContent = currentCount;
-        buttonElement.classList.remove('referenced');
-        window.showToast('💡 已取消參考標記');
-      } else {
-        currentCount += 1;
-        countElement.textContent = currentCount;
-        buttonElement.classList.add('referenced');
-        window.showToast('💡 標記為很有參考價值！');
-      }
+      
+      // 🔴 修改：只能增加
+      currentCount += 1;
+      countElement.textContent = currentCount;
+      buttonElement.classList.add('referenced');
+      window.showToast('💡 標記為很有參考價值！');
+      
+      // 🔴 新增：呼叫保存函數
+      saveInteraction(index, 'reference', currentCount);
     }
   }
 
   function purchaseOutfit(index) {
     const countElement = document.getElementById('modalPurchaseCount');
     const buttonElement = event.target.closest('.action-btn');
-
+  
+    // 🔴 新增：檢查登入狀態
+    if (!window.isLoggedIn || !window.customerInfo || !window.customerInfo.email) {
+      window.showToast('❌ 請先登入會員才能互動');
+      setTimeout(() => {
+        window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
+      }, 1500);
+      return;
+    }
+  
+    // 🔴 新增：檢查是否已經互動過
+    const outfit = outfitData[index];
+    const outfitId = outfit['投稿ID'];
+    if (userInteractions[outfitId] && userInteractions[outfitId]['purchase']) {
+      window.showToast('ℹ️ 您已經標記過購買了');
+      return;
+    }
+  
     if (countElement && buttonElement) {
       window.addButtonFeedback(buttonElement);
       
       let currentCount = parseInt(countElement.textContent) || 0;
-
-      if (buttonElement.classList.contains('purchased')) {
-        currentCount = Math.max(0, currentCount - 1);
-        countElement.textContent = currentCount;
-        buttonElement.classList.remove('purchased');
-        window.showToast('🛒 已取消購買標記');
-      } else {
-        currentCount += 1;
-        countElement.textContent = currentCount;
-        buttonElement.classList.add('purchased');
-        window.showToast('🛒 已標記購買同款！');
-      }
+      
+      // 🔴 修改：只能增加
+      currentCount += 1;
+      countElement.textContent = currentCount;
+      buttonElement.classList.add('purchased');
+      window.showToast('🛒 已標記購買同款！');
+      
+      // 🔴 新增：呼叫保存函數
+      saveInteraction(index, 'purchase', currentCount);
     }
   }
 
@@ -537,6 +632,17 @@ if (modalUserInfo) {
       const status = outfit['審核狀態'] || '';
       const instagramUrl = outfit['Instagram連結'] || '';
       const avatarUrl = outfit['自訂頭像'] || ''; // 確保在這裡宣告
+
+      / 讀取實際的計數
+      const loveCount = outfit['按讚數'] || 0;
+      const refCount = outfit['參考數'] || 0;
+      const purchaseCount = outfit['購買數'] || 0;
+      
+      // 檢查用戶是否已經互動過
+      const outfitId = outfit['投稿ID'];
+      const hasLiked = userInteractions[outfitId]?.like || false;
+      const hasReferenced = userInteractions[outfitId]?.reference || false;
+      const hasPurchased = userInteractions[outfitId]?.purchase || false;
     
       console.log('處理投稿 ' + (i+1) + ':', name, '狀態:', status);
       
@@ -589,23 +695,35 @@ if (modalUserInfo) {
       const refCount = outfit['參考數'] || 0;
       const purchaseCount = outfit['購買數'] || 0;
       
+      // 手機端互動按鈕
       card += `
         <div class="outfit-actions-mobile">
-          <button class="action-btn-mobile ${loveCount > 0 ? 'liked' : ''}" onclick="quickLike(${i}, this)" data-outfit-id="${outfit['投稿ID']}">
+          <button class="action-btn-mobile ${hasLiked ? 'liked' : ''}" 
+                  onclick="handleInteraction(${i}, 'like', this)" 
+                  data-outfit-id="${outfitId}"
+                  data-interaction-type="like">
             <span>❤️</span>
             <span class="count">${loveCount}</span>
           </button>
-          <button class="action-btn-mobile ${refCount > 0 ? 'referenced' : ''}" onclick="quickReference(${i}, this)" data-outfit-id="${outfit['投稿ID']}">
+          <button class="action-btn-mobile ${hasReferenced ? 'referenced' : ''}" 
+                  onclick="handleInteraction(${i}, 'reference', this)" 
+                  data-outfit-id="${outfitId}"
+                  data-interaction-type="reference">
             <span>💡</span>
             <span class="count">${refCount}</span>
           </button>
-          <button class="action-btn-mobile ${purchaseCount > 0 ? 'purchased' : ''}" onclick="quickPurchase(${i}, this)" data-outfit-id="${outfit['投稿ID']}">
+          <button class="action-btn-mobile ${hasPurchased ? 'purchased' : ''}" 
+                  onclick="handleInteraction(${i}, 'purchase', this)" 
+                  data-outfit-id="${outfitId}"
+                  data-interaction-type="purchase">
             <span>🛒</span>
             <span class="count">${purchaseCount}</span>
           </button>
         </div>
       `;
       card += '</div></div>';
+      cards.push(card);
+    }
       
       // 簡化的留言預覽
       if (comment) {
@@ -668,7 +786,110 @@ if (modalUserInfo) {
     initOutfitWall();
   }
 // ===== 新增快速互動函數（加在 outfit-wall.js 底部）=====
-
+window.handleInteraction = function(index, interactionType, button) {
+  // 檢查是否已登入
+  if (!window.isLoggedIn || !window.customerInfo || !window.customerInfo.email) {
+    window.showToast('❌ 請先登入會員才能互動');
+    setTimeout(() => {
+      window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
+    }, 1500);
+    return;
+  }
+  
+  const outfit = outfitData[index];
+  if (!outfit) return;
+  
+  const outfitId = outfit['投稿ID'];
+  const memberEmail = window.customerInfo.email;
+  
+  // 檢查是否已經互動過
+  if (userInteractions[outfitId] && userInteractions[outfitId][interactionType]) {
+    const messages = {
+      'like': '您已經按過愛心了',
+      'reference': '您已經標記過參考了',
+      'purchase': '您已經標記過購買了'
+    };
+    window.showToast('ℹ️ ' + messages[interactionType]);
+    return;
+  }
+  
+  // 顯示載入狀態
+  button.disabled = true;
+  const originalText = button.innerHTML;
+  
+  // 發送互動請求
+  fetch(window.OUTFIT_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'handleInteraction',
+      memberEmail: memberEmail,
+      submissionId: outfitId,
+      interactionType: interactionType
+    })
+  })
+  .then(response => response.json())
+  .then(result => {
+    if (result.success) {
+      // 更新本地資料
+      const countSpan = button.querySelector('.count');
+      if (countSpan) {
+        countSpan.textContent = result.newCount;
+      }
+      
+      // 更新按鈕狀態
+      const classMap = {
+        'like': 'liked',
+        'reference': 'referenced',
+        'purchase': 'purchased'
+      };
+      button.classList.add(classMap[interactionType]);
+      
+      // 更新本地互動記錄
+      if (!userInteractions[outfitId]) {
+        userInteractions[outfitId] = {};
+      }
+      userInteractions[outfitId][interactionType] = true;
+      
+      // 更新 outfitData
+      const countMap = {
+        'like': '按讚數',
+        'reference': '參考數',
+        'purchase': '購買數'
+      };
+      outfit[countMap[interactionType]] = result.newCount;
+      
+      // 顯示成功訊息
+      const successMessages = {
+        'like': '❤️ 已按讚！',
+        'reference': '💡 標記為很有參考價值！',
+        'purchase': '🛒 已標記購買同款！'
+      };
+      window.showToast(successMessages[interactionType]);
+      
+      // 震動反饋
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+      
+      // 同步更新模態框中的計數（如果開啟中）
+      if (currentModal === index) {
+        updateModalCounts(outfit);
+      }
+      
+    } else if (result.alreadyInteracted) {
+      window.showToast('ℹ️ ' + result.error);
+    } else {
+      window.showToast('❌ ' + (result.error || '互動失敗'));
+    }
+  })
+  .catch(error => {
+    console.error('互動失敗:', error);
+    window.showToast('❌ 網路錯誤，請稍後再試');
+  })
+  .finally(() => {
+    button.disabled = false;
+  });
+};
 // 快速按讚（手機端）
 window.quickLike = function(index, button) {
   const countSpan = button.querySelector('.count');
@@ -735,4 +956,45 @@ window.quickPurchase = function(index, button) {
     navigator.vibrate(50);
   }
 };
+// 新增：保存互動到後端的輔助函數
+function saveInteraction(index, interactionType, newCount) {
+  const outfit = outfitData[index];
+  const outfitId = outfit['投稿ID'];
+  const memberEmail = window.customerInfo.email;
+  
+  // 發送到後端
+  fetch(window.OUTFIT_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'handleInteraction',
+      memberEmail: memberEmail,
+      submissionId: outfitId,
+      interactionType: interactionType
+    })
+  })
+  .then(response => response.json())
+  .then(result => {
+    if (result.success) {
+      // 更新本地記錄
+      if (!userInteractions[outfitId]) {
+        userInteractions[outfitId] = {};
+      }
+      userInteractions[outfitId][interactionType] = true;
+      
+      // 更新 outfitData
+      const countMap = {
+        'like': '按讚數',
+        'reference': '參考數',
+        'purchase': '購買數'
+      };
+      outfit[countMap[interactionType]] = result.newCount || newCount;
+      
+      console.log(`✅ 成功保存 ${interactionType} 互動`);
+    }
+  })
+  .catch(error => {
+    console.error('保存互動失敗:', error);
+    window.showToast('❌ 網路錯誤，互動可能未保存');
+  });
+}
 })();
