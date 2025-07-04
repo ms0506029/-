@@ -581,6 +581,23 @@ if (modalUserInfo) {
       if (instagramUsername) {
         card += '<p class="instagram-handle">@' + instagramUsername + '</p>';
       }
+
+      card += `
+        <div class="outfit-actions-mobile">
+          <button class="action-btn-mobile" onclick="quickLike(${i}, this)">
+            <span>❤️</span>
+            <span class="count">0</span>
+          </button>
+          <button class="action-btn-mobile" onclick="quickReference(${i}, this)">
+            <span>💡</span>
+            <span class="count">0</span>
+          </button>
+          <button class="action-btn-mobile" onclick="quickPurchase(${i}, this)">
+            <span>🛒</span>
+            <span class="count">0</span>
+          </button>
+        </div>
+      `;
       card += '</div></div>';
       
       // 簡化的留言預覽
@@ -643,5 +660,72 @@ if (modalUserInfo) {
   } else {
     initOutfitWall();
   }
+// ===== 新增快速互動函數（加在 outfit-wall.js 底部）=====
 
+// 快速按讚（手機端）
+window.quickLike = function(index, button) {
+  const countSpan = button.querySelector('.count');
+  let count = parseInt(countSpan.textContent) || 0;
+  
+  if (button.classList.contains('liked')) {
+    count = Math.max(0, count - 1);
+    button.classList.remove('liked');
+    window.showToast('💔 已取消按讚');
+  } else {
+    count += 1;
+    button.classList.add('liked');
+    window.showToast('❤️ 已按讚！');
+  }
+  
+  countSpan.textContent = count;
+  
+  // 震動反饋（如果支援）
+  if (navigator.vibrate) {
+    navigator.vibrate(50);
+  }
+};
+
+// 快速標記參考（手機端）
+window.quickReference = function(index, button) {
+  const countSpan = button.querySelector('.count');
+  let count = parseInt(countSpan.textContent) || 0;
+  
+  if (button.classList.contains('referenced')) {
+    count = Math.max(0, count - 1);
+    button.classList.remove('referenced');
+    window.showToast('💡 已取消參考標記');
+  } else {
+    count += 1;
+    button.classList.add('referenced');
+    window.showToast('💡 標記為很有參考價值！');
+  }
+  
+  countSpan.textContent = count;
+  
+  if (navigator.vibrate) {
+    navigator.vibrate(50);
+  }
+};
+
+// 快速購買標記（手機端）
+window.quickPurchase = function(index, button) {
+  const countSpan = button.querySelector('.count');
+  let count = parseInt(countSpan.textContent) || 0;
+  
+  if (button.classList.contains('purchased')) {
+    count = Math.max(0, count - 1);
+    button.classList.remove('purchased');
+    window.showToast('🛒 已取消購買標記');
+  } else {
+    count += 1;
+    button.classList.add('purchased');
+    window.showToast('🛒 已標記購買同款！');
+  }
+  
+  countSpan.textContent = count;
+  
+  if (navigator.vibrate) {
+    navigator.vibrate(50);
+  }
+};
 })();
