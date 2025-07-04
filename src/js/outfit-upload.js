@@ -161,8 +161,8 @@ function handleAvatarSelect(file) {
     return;
   }
   
-  if (file.size > 2 * 1024 * 1024) {
-    window.showToast('❌ 頭像大小不能超過2MB');
+  if (file.size > 5 * 1024 * 1024) {
+    window.showToast('❌ 頭像大小不能超過5MB');
     return;
   }
   
@@ -219,10 +219,10 @@ function uploadImageToGoogleDrive(file) {
   return new Promise((resolve, reject) => {
     console.log('📸 準備上傳圖片到 Google Drive:', file.name);
     
-    // 檢查檔案大小（建議限制 5MB）
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // 修改：檢查檔案大小從 5MB 提升到 10MB（給主圖片更大空間）
+    const maxSize = 10 * 1024 * 1024; // 10MB for main images
     if (file.size > maxSize) {
-      reject(new Error('圖片大小不能超過 5MB'));
+      reject(new Error('圖片大小不能超過 10MB'));
       return;
     }
     
