@@ -1617,3 +1617,230 @@
 .admin-btn-delete:hover {
   background: #c0392b !important;
 }
+/* outfit-styles.css - 手機端修復版本 */
+/* 在原有 CSS 最後加入以下修復代碼 */
+
+/* ===== 手機端穿搭牆修復 ===== */
+@media (max-width: 768px) {
+  /* 修復穿搭卡片在手機上的顯示 */
+  .outfit-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 15px;
+  }
+  
+  /* 確保卡片內容正確顯示 */
+  .outfit-card .outfit-info {
+    padding: 12px;
+    background: white;
+  }
+  
+  /* 修復用戶資訊區塊 */
+  .user-info-compact {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  /* 頭像大小調整 */
+  .user-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    font-size: 0.9rem;
+  }
+  
+  /* 留言預覽文字大小 */
+  .outfit-comment-preview {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    padding: 8px 0;
+  }
+  
+  /* 商品標誌調整 */
+  .product-badge {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    margin-top: 8px;
+  }
+  
+  /* 新增：手機端互動按鈕區 */
+  .outfit-actions-mobile {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 10px;
+  }
+  
+  .action-btn-mobile {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: #666;
+    background: none;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .action-btn-mobile:active {
+    transform: scale(0.95);
+  }
+  
+  .action-btn-mobile.liked {
+    color: #e74c3c;
+  }
+  
+  .action-btn-mobile .count {
+    font-weight: 600;
+  }
+  
+  /* 模態框手機優化 */
+  .modal-content {
+    width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .modal-body {
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+  }
+  
+  .modal-image {
+    max-height: 40vh;
+    flex-shrink: 0;
+  }
+  
+  .modal-info {
+    padding: 20px 15px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  /* 關閉按鈕更明顯 */
+  .modal-close {
+    width: 40px;
+    height: 40px;
+    font-size: 28px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+  }
+  
+  /* 模態框內的按鈕組 */
+  .modal-actions {
+    flex-direction: row;
+    gap: 5px;
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 15px 0;
+    border-top: 1px solid #e9ecef;
+    margin: 0 -15px;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  
+  .modal-actions .action-btn {
+    flex: 1;
+    padding: 10px 5px;
+    font-size: 0.8rem;
+  }
+  
+  .modal-actions .action-btn span:first-child {
+    font-size: 1rem;
+  }
+  
+  /* Instagram 顯示優化 */
+  .instagram-display {
+    font-size: 0.85rem;
+  }
+  
+  /* 商品資訊區塊優化 */
+  .modal-products,
+  .modal-demand {
+    padding: 15px;
+    margin: 15px 0;
+  }
+  
+  .product-item {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .product-label {
+    font-size: 0.85rem;
+    min-width: 60px;
+  }
+  
+  .product-info {
+    flex: 1;
+    font-size: 0.85rem;
+  }
+  
+  .product-want-btn {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+}
+
+/* 手機橫向模式優化 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .modal-body {
+    flex-direction: row;
+  }
+  
+  .modal-image {
+    max-height: 100%;
+    max-width: 40%;
+  }
+  
+  .modal-info {
+    flex: 1;
+  }
+}
+
+/* 超小螢幕設備 (< 480px) */
+@media (max-width: 480px) {
+  .outfit-wall-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .outfit-wall-header p {
+    font-size: 0.95rem;
+  }
+  
+  .upload-btn {
+    font-size: 0.9rem;
+    padding: 10px 20px;
+  }
+  
+  /* 單欄佈局 */
+  .outfit-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+    padding: 0 10px;
+  }
+  
+  /* 用戶名和身高體重換行顯示 */
+  .modal-user .user-details h2 {
+    font-size: 1.1rem;
+    line-height: 1.3;
+  }
+}
+
+/* 確保桌面端不顯示手機端按鈕 */
+@media (min-width: 769px) {
+  .outfit-actions-mobile {
+    display: none !important;
+  }
+}
