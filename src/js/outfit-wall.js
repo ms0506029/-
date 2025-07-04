@@ -11,6 +11,9 @@
   // 儲存穿搭資料和當前模態框資料
   let outfitData = [];
   let currentModal = null;
+
+  let userInteractions = {};
+  let isLoadingInteractions = false;
   
   
   // 新增：按鈕點擊反饋函式
@@ -582,19 +585,23 @@ if (modalUserInfo) {
         card += '<p class="instagram-handle">@' + instagramUsername + '</p>';
       }
 
+      const loveCount = outfit['按讚數'] || 0;
+      const refCount = outfit['參考數'] || 0;
+      const purchaseCount = outfit['購買數'] || 0;
+      
       card += `
         <div class="outfit-actions-mobile">
-          <button class="action-btn-mobile" onclick="quickLike(${i}, this)">
+          <button class="action-btn-mobile ${loveCount > 0 ? 'liked' : ''}" onclick="quickLike(${i}, this)" data-outfit-id="${outfit['投稿ID']}">
             <span>❤️</span>
-            <span class="count">0</span>
+            <span class="count">${loveCount}</span>
           </button>
-          <button class="action-btn-mobile" onclick="quickReference(${i}, this)">
+          <button class="action-btn-mobile ${refCount > 0 ? 'referenced' : ''}" onclick="quickReference(${i}, this)" data-outfit-id="${outfit['投稿ID']}">
             <span>💡</span>
-            <span class="count">0</span>
+            <span class="count">${refCount}</span>
           </button>
-          <button class="action-btn-mobile" onclick="quickPurchase(${i}, this)">
+          <button class="action-btn-mobile ${purchaseCount > 0 ? 'purchased' : ''}" onclick="quickPurchase(${i}, this)" data-outfit-id="${outfit['投稿ID']}">
             <span>🛒</span>
-            <span class="count">0</span>
+            <span class="count">${purchaseCount}</span>
           </button>
         </div>
       `;
