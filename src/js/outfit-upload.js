@@ -45,6 +45,11 @@ function initUploadForm() {
   
   // 設定 Instagram 相關事件
   setupInstagramInputs();
+
+  // 如果已登入，載入購買歷史
+  if (window.isLoggedIn) {
+    loadPurchasedProducts();
+  }
   
   console.log('✅ 投稿表單初始化完成');
 }
@@ -645,6 +650,87 @@ function setupInstagramInputs() {
   }
   
   console.log('✅ Instagram 輸入功能設定完成');
+}
+
+// 新增：載入購買歷史
+async function loadPurchasedProducts() {
+  try {
+    let memberEmail = window.customerInfo?.email;
+    
+    if (!memberEmail && typeof customer !== 'undefined') {
+      memberEmail = customer?.email;
+    }
+    
+    if (!memberEmail) return;
+    
+    console.log('載入購買歷史...');
+    
+    const response = await fetch(window.OUTFIT_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'getCustomerPurchasedProducts',
+        email: memberEmail
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success && result.products.length > 0) {
+      console.log('找到 ' + result.products.length + ' 個購買商品');
+      setupProductSelectors(result.products);
+    }
+    
+  } catch (error) {
+    console.error('載入購買歷史失敗:', error);
+  }
+}
+
+// 設定商品選擇器
+function setupProductSelectors(products) {
+  // 在每個商品輸入區域前加入選擇器
+  const productTypes = [
+    { id: 'basic', label: '選擇已購買商品' },
+    { id: 'top', label: '選擇上衣' },
+    { id: 'bottom', label: '選擇下身' },
+    { id: 'outer', label: '選擇外套' },
+    { id: 'shoes', label: '選擇鞋子' },
+    { id: 'accessory', label: '選擇配件' }
+  ];
+  
+  productTypes.forEach(type => {
+    const urlInput = document.getElementById(type.id + 'ProductUrl');
+    if (!urlInput) return;
+    
+    // 建立選擇器
+    const selector = document.createElement('select');
+    selector.id = type.id + 'ProductSelector';
+    selector.className = 'product-selector';
+    selector.innerHTML = '<option value="">-- ' + type.label + ' --</option>';
+    
+    // 加入商品選項
+    products.forEach(product => {
+      const option = document.createElement('option');
+      option.value = product.url;
+      option.textContent = product.title + (product.sku ? ' (' + product.sku + ')' : '');
+      option.dataset.productId = product.id;
+      selector.appendChild(option);
+    });
+    
+    // 插入選擇器
+    urlInput.parentNode.insertBefore(selector, urlInput);
+    
+    // 加入一些間距
+    selector.style.marginBottom = '10px';
+    selector.style.width = '100%';
+    
+    // 選擇時自動填入網址
+    selector.addEventListener('change', function() {
+      if (this.value) {
+        urlInput.value = this.value;
+        window.showToast('✅ 已選擇：' + this.options[this.selectedIndex].text);
+      }
+    });
+  });
 }
 
 // 收集商品資訊
