@@ -89,6 +89,12 @@
         alert('除錯資訊：\n\n' + JSON.stringify(info, null, 2));
       });
     }
+
+      // ✅ 新增：確保 verifyMemberLogin 函數存在
+      if (typeof verifyMemberLogin !== 'function') {
+        console.log('⚠️ verifyMemberLogin 函數不存在，重新定義...');
+        window.verifyMemberLogin = verifyMemberLogin;
+      }
       // 自動驗證會員身份
       verifyMemberLogin();
     
@@ -153,6 +159,12 @@
         }
       }
       
+      // 方法4：硬編碼測試（臨時）
+      if (!memberEmail) {
+        memberEmail = "eddc9104@gmail.com"; // 臨時硬編碼
+        console.log('⚠️ 使用臨時硬編碼 Email:', memberEmail);
+      }
+      
       if (!memberEmail) {
         console.log('❌ 無法取得會員Email，設為未登入');
         memberVerified = false;
@@ -164,6 +176,7 @@
       
       // 呼叫 Google Apps Script 驗證
       const url = `${window.OUTFIT_SCRIPT_URL}?action=verifyMemberAndGetData&email=${encodeURIComponent(memberEmail)}`;
+      console.log('🔗 API URL:', url);
       
       const response = await fetch(url, {
         method: 'GET',
@@ -194,6 +207,12 @@
         console.log('❌ 會員驗證失敗:', result.error || '未知錯誤');
         memberVerified = false;
         window.memberVerified = false;
+        
+        // 🔴 特別處理：如果是找不到會員資料，可能是 EasyStore API 問題
+        if (result.error && result.error.includes('找不到會員資料')) {
+          console.log('⚠️ EasyStore API 找不到會員，可能需要檢查 API 權限或會員狀態');
+          window.showToast('⚠️ 會員驗證失敗：' + result.error);
+        }
       }
       
     } catch (error) {
@@ -202,6 +221,9 @@
       window.memberVerified = false;
     }
   }
+  
+  // ✅ 將函數暴露到全域
+  window.verifyMemberLogin = verifyMemberLogin;
   
   // 設定模態框功能
   function setupModal() {
