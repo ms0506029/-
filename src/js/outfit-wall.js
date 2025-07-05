@@ -178,9 +178,13 @@
       const url = `${window.OUTFIT_SCRIPT_URL}?action=verifyMemberAndGetData&email=${encodeURIComponent(memberEmail)}`;
       console.log('🔗 API URL:', url);
       
-      const response = await fetch(url, {
-        method: 'GET',
-        mode: 'cors'
+      // 改為使用 POST 方式：
+      const response = await fetch(window.OUTFIT_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'verifyMemberAndGetData',
+          email: memberEmail
+        })
       });
       
       const result = await response.json();
