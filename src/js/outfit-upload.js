@@ -1006,13 +1006,14 @@ window.addEventListener('load', function() {
     initUploadForm();
   }
 
+
 // 生成商品卡片
 function generateProductCards(products, containerId, urlInput) {
   const container = document.getElementById(containerId);
   if (!container) return;
   
   container.innerHTML = products.map(product => `
-    <div class="product-card" onclick="selectProduct('${product.url}', '${product.name}', this)" data-url="${product.url}">
+    <div class="product-card" onclick="selectProduct('${product.url}', '${product.name}', this, '${product.productId}')" data-url="${product.url}">
       <div class="product-image">
         <img src="${product.image || 'https://placehold.jp/150x150/f8f9fa/333333?text=商品圖片'}" 
              alt="${product.name}" 
@@ -1031,7 +1032,6 @@ function generateProductCards(products, containerId, urlInput) {
     </div>
   `).join('');
 }
-
 
 // 選擇商品（含狀態檢查）
 window.selectProduct = async function(url, name, cardElement, productId) {
@@ -1157,6 +1157,29 @@ function injectProductCardStyles() {
     .product-card.selected {
       border-color: #27ae60;
       background: #f0fff4;
+    }
+    
+    .product-card.unavailable {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #f8f8f8;
+      border-color: #e74c3c;
+    }
+    
+    .product-card.unavailable::after {
+      content: '已下架';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(231, 76, 60, 0.8);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border-radius: 8px;
     }
     
     .product-image img {
