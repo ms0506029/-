@@ -10,9 +10,9 @@
   
   
   // 儲存穿搭資料和當前模態框資料
-  let outfitData = [];
-  let currentModal = null;
-  let userInteractions = {};
+  window.outfitData = [];
+  window.currentModal = null;
+  window.userInteractions = {};
   let isLoadingInteractions = false;
   
   // 🔴 確保這兩行在這裡，而不是在函數內部
@@ -81,7 +81,7 @@
           'API URL': window.OUTFIT_SCRIPT_URL,
           '頁面標題': document.title,
           'outfitGrid 元素': grid ? '✅ 找到' : '❌ 未找到',
-          '穿搭資料數量': outfitData.length,
+          '穿搭資料數量': window.outfitData.length,
           '當前時間': new Date().toISOString()
         };
         console.log('📊 除錯資訊:', info);
@@ -119,7 +119,7 @@
           console.log('用戶互動記錄:', userInteractions);
           
           // 如果穿搭已經載入，更新按鈕狀態
-          if (outfitData.length > 0) {
+          if (window.outfitData.length > 0) {
             updateAllInteractionButtons();
           }
         }
@@ -200,7 +200,7 @@
         window.showToast('👋 歡迎回來，' + memberData.name);
         
         // 更新按鈕狀態
-        if (outfitData.length > 0) {
+        if (window.outfitData && window.outfitData.length > 0) {
           updateAllInteractionButtons();
         }
       } else {
@@ -248,11 +248,11 @@
 
  // 開啟模態框（升級版）
   function openModal(outfitIndex) {
-    const outfit = outfitData[outfitIndex];
+    const outfit = window.outfitData[outfitIndex];
     if (!outfit) return;
     
     console.log('📖 開啟穿搭詳情:', outfit);
-    currentModal = outfitIndex;
+    window.currentModal = outfitIndex;
     
     const modal = document.getElementById('detailModal');
     if (!modal) return;
@@ -525,7 +525,7 @@ if (modalUserInfo) {
         
         // 更新需求統計顯示
         setTimeout(() => {
-          const outfit = outfitData[currentModal];
+          const outfit = window.outfitData[window.currentModal];
           if (outfit) {
             // 更新本地資料
             const statsKey = itemType + '需求統計';
@@ -550,7 +550,7 @@ if (modalUserInfo) {
     if (modal) {
       modal.style.display = 'none';
       document.body.style.overflow = '';
-      currentModal = null;
+      window.currentModal = null;
     }
   }
   
@@ -570,7 +570,7 @@ if (modalUserInfo) {
     }
   
     // 🔴 新增：檢查是否已經互動過
-    const outfit = outfitData[index];
+    const outfit = window.outfitData[index];
     const outfitId = outfit['投稿ID'];
     if (userInteractions[outfitId] && userInteractions[outfitId]['like']) {
       window.showToast('ℹ️ 您已經按過愛心了');
@@ -607,7 +607,7 @@ if (modalUserInfo) {
     }
   
     // 🔴 新增：檢查是否已經互動過
-    const outfit = outfitData[index];
+    const outfit = window.outfitData[index];
     const outfitId = outfit['投稿ID'];
     if (userInteractions[outfitId] && userInteractions[outfitId]['reference']) {
       window.showToast('ℹ️ 您已經標記過參考了');
@@ -644,7 +644,7 @@ if (modalUserInfo) {
     }
   
     // 🔴 新增：檢查是否已經互動過
-    const outfit = outfitData[index];
+    const outfit = window.outfitData[index];
     const outfitId = outfit['投稿ID'];
     if (userInteractions[outfitId] && userInteractions[outfitId]['purchase']) {
       window.showToast('ℹ️ 您已經標記過購買了');
@@ -694,12 +694,12 @@ if (modalUserInfo) {
         if (result.success) {
           if (result.data && result.data.length > 0) {
             console.log('✅ 找到 ' + result.data.length + ' 個已通過的穿搭');
-            outfitData = result.data;
+            window.outfitData = result.data;
             
             displayOutfits(result.data);
           } else {
             console.log('ℹ️ 沒有找到已通過的穿搭');
-            outfitData = [];
+            window.outfitData = [];
             showNoOutfits();
           }
         } else {
@@ -891,7 +891,7 @@ window.handleInteraction = function(index, interactionType, button) {
     return;
   }
   
-  const outfit = outfitData[index];
+  const outfit = window.outfitData[index];
   if (!outfit) return;
   
   const outfitId = outfit['投稿ID'];
@@ -967,7 +967,7 @@ window.handleInteraction = function(index, interactionType, button) {
       }
       
       // 同步更新模態框中的計數（如果開啟中）
-      if (currentModal === index) {
+      if (window.currentModal === index) {
         updateModalCounts(outfit);
       }
       
@@ -1053,7 +1053,7 @@ window.quickPurchase = function(index, button) {
 };
 // 新增：保存互動到後端的輔助函數
 function saveInteraction(index, interactionType, newCount) {
-  const outfit = outfitData[index];
+  const outfit = window.outfitData[index];
   const outfitId = outfit['投稿ID'];
   const memberEmail = window.memberData.email;
   
