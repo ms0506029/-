@@ -14,6 +14,9 @@
 
   let userInteractions = {};
   let isLoadingInteractions = false;
+
+  let memberVerified = false;
+  let memberData = null;
   
   
   // 新增：按鈕點擊反饋函式
@@ -81,9 +84,8 @@
         alert('除錯資訊：\n\n' + JSON.stringify(info, null, 2));
       });
     }
-      if (window.isLoggedIn && window.customerInfo && window.customerInfo.email) {
-      loadUserInteractions(window.customerInfo.email);
-    }
+      // 自動驗證會員身份
+      verifyMemberLogin();
     
     // 設定模態框功能
     setupModal();
@@ -118,7 +120,69 @@
         isLoadingInteractions = false;
       });
   }
-
+  // 新增：驗證會員登入
+  async function verifyMemberLogin() {
+    try {
+      // 嘗試各種方式取得 email
+      let memberEmail = null;
+      
+      // 方法1：從 window 變數
+      if (window.customerInfo && window.customerInfo.email) {
+        memberEmail = window.customerInfo.email;
+      }
+      // 方法2：從 EasyStore customer 物件
+      else if (typeof customer !== 'undefined' && customer && customer.email) {
+        memberEmail = customer.email;
+      }
+      // 方法3：從 Liquid 注入的 meta 標籤
+      else {
+        const metaEmail = document.querySelector('meta[name="customer-email"]');
+        if (metaEmail) {
+          memberEmail = metaEmail.content;
+        }
+      }
+      
+      if (!memberEmail) {
+        console.log('未偵測到登入狀態');
+        memberVerified = false;
+        return;
+      }
+      
+      console.log('偵測到會員 Email:', memberEmail);
+      
+      // 使用 API 驗證並取得資料
+      const response = await fetch(window.OUTFIT_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'verifyMemberAndGetData',
+          email: memberEmail
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success && result.isLoggedIn) {
+        memberVerified = true;
+        memberData = result.memberData;
+        userInteractions = result.interactions || {};
+        
+        console.log('✅ 會員驗證成功:', memberData.name);
+        window.showToast('👋 歡迎回來，' + memberData.name);
+        
+        // 更新所有按鈕狀態
+        if (outfitData.length > 0) {
+          updateAllInteractionButtons();
+        }
+      } else {
+        memberVerified = false;
+        console.log('❌ 會員驗證失敗');
+      }
+      
+    } catch (error) {
+      console.error('會員驗證錯誤:', error);
+      memberVerified = false;
+    }
+  }
   
   // 設定模態框功能
   function setupModal() {
@@ -456,7 +520,7 @@ if (modalUserInfo) {
     const buttonElement = event.target.closest('.action-btn');
   
     // 🔴 新增：檢查登入狀態
-    if (!window.isLoggedIn || !window.customerInfo || !window.customerInfo.email) {
+    if (!memberVerified || !memberData) {
       window.showToast('❌ 請先登入會員才能互動');
       setTimeout(() => {
         window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
@@ -493,7 +557,7 @@ if (modalUserInfo) {
     const buttonElement = event.target.closest('.action-btn');
   
     // 🔴 新增：檢查登入狀態
-    if (!window.isLoggedIn || !window.customerInfo || !window.customerInfo.email) {
+    if (!memberVerified || !memberData) {
       window.showToast('❌ 請先登入會員才能互動');
       setTimeout(() => {
         window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
@@ -530,7 +594,7 @@ if (modalUserInfo) {
     const buttonElement = event.target.closest('.action-btn');
   
     // 🔴 新增：檢查登入狀態
-    if (!window.isLoggedIn || !window.customerInfo || !window.customerInfo.email) {
+    if (!memberVerified || !memberData) {
       window.showToast('❌ 請先登入會員才能互動');
       setTimeout(() => {
         window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
@@ -778,8 +842,7 @@ if (modalUserInfo) {
   }
 // ===== 新增快速互動函數（加在 outfit-wall.js 底部）=====
 window.handleInteraction = function(index, interactionType, button) {
-  // 檢查是否已登入
-  if (!window.isLoggedIn || !window.customerInfo || !window.customerInfo.email) {
+  if (!memberVerified || !memberData) {
     window.showToast('❌ 請先登入會員才能互動');
     setTimeout(() => {
       window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
@@ -791,7 +854,7 @@ window.handleInteraction = function(index, interactionType, button) {
   if (!outfit) return;
   
   const outfitId = outfit['投稿ID'];
-  const memberEmail = window.customerInfo.email;
+  const memberEmail = memberData.email;
   
   // 檢查是否已經互動過
   if (userInteractions[outfitId] && userInteractions[outfitId][interactionType]) {
