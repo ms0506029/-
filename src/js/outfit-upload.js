@@ -652,7 +652,8 @@ function setupInstagramInputs() {
   console.log('✅ Instagram 輸入功能設定完成');
 }
 
-// 新增：載入購買歷史
+
+// 新增：載入購買歷史（強化版）
 async function loadPurchasedProducts() {
   try {
     let memberEmail = window.customerInfo?.email;
@@ -663,21 +664,26 @@ async function loadPurchasedProducts() {
     
     if (!memberEmail) return;
     
-    console.log('載入購買歷史...');
+    console.log('🛍️ 載入購買歷史（強化版）...', memberEmail);
     
     const response = await fetch(window.OUTFIT_SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify({
-        action: 'getCustomerPurchasedProducts',
+        action: 'getCustomerPurchasedProductsEnhanced',
         email: memberEmail
       })
     });
     
     const result = await response.json();
     
-    if (result.success && result.products.length > 0) {
-      console.log('找到 ' + result.products.length + ' 個購買商品');
-      setupProductSelectors(result.products);
+    if (result.success && result.products && result.products.length > 0) {
+      console.log(`✅ 找到 ${result.products.length} 個購買商品`);
+      setupEnhancedProductSelectors(result.products);
+      
+      // 顯示成功提示
+      window.showToast(`🛍️ 已載入您的 ${result.products.length} 個購買記錄`);
+    } else {
+      console.log('ℹ️ 沒有找到購買記錄');
     }
     
   } catch (error) {
@@ -685,11 +691,14 @@ async function loadPurchasedProducts() {
   }
 }
 
-// 設定商品選擇器
-function setupProductSelectors(products) {
-  // 在每個商品輸入區域前加入選擇器
+
+// 設定強化版商品選擇器
+function setupEnhancedProductSelectors(products) {
+  console.log('🎯 設定強化版商品選擇器...');
+  
+  // 商品輸入區域配置
   const productTypes = [
-    { id: 'basic', label: '選擇已購買商品' },
+    { id: 'basic', label: '選擇已購買商品', priority: true },
     { id: 'top', label: '選擇上衣' },
     { id: 'bottom', label: '選擇下身' },
     { id: 'outer', label: '選擇外套' },
@@ -701,35 +710,70 @@ function setupProductSelectors(products) {
     const urlInput = document.getElementById(type.id + 'ProductUrl');
     if (!urlInput) return;
     
-    // 建立選擇器
-    const selector = document.createElement('select');
-    selector.id = type.id + 'ProductSelector';
-    selector.className = 'product-selector';
-    selector.innerHTML = '<option value="">-- ' + type.label + ' --</option>';
-    
-    // 加入商品選項
-    products.forEach(product => {
-      const option = document.createElement('option');
-      option.value = product.url;
-      option.textContent = product.title + (product.sku ? ' (' + product.sku + ')' : '');
-      option.dataset.productId = product.id;
-      selector.appendChild(option);
-    });
-    
-    // 插入選擇器
-    urlInput.parentNode.insertBefore(selector, urlInput);
-    
-    // 加入一些間距
-    selector.style.marginBottom = '10px';
-    selector.style.width = '100%';
-    
-    // 選擇時自動填入網址
-    selector.addEventListener('change', function() {
-      if (this.value) {
-        urlInput.value = this.value;
-        window.showToast('✅ 已選擇：' + this.options[this.selectedIndex].text);
-      }
-    });
+    // 為基本商品區域建立特別強化的選擇器
+    if (type.priority) {
+      createPriorityProductSelector(type, products, urlInput);
+    } else {
+      createStandardProductSelector(type, products, urlInput);
+    }
+  });
+  
+  console.log('✅ 商品選擇器設定完成');
+}
+
+// 建立優先級商品選擇器（用於基本商品區域）
+function createPriorityProductSelector(type, products, urlInput) {
+  const container = urlInput.parentNode;
+  
+  // 建立商品卡片展示區域
+  const cardContainer = document.createElement('div');
+  cardContainer.className = 'purchased-products-grid';
+  cardContainer.innerHTML = `
+    <div class="products-header">
+      <h4>🛍️ 您的購買記錄 (${products.length} 個商品)</h4>
+      <p>點擊選擇要分享的商品</p>
+    </div>
+    <div class="products-grid" id="productsGrid"></div>
+  `;
+  
+  // 插入到URL輸入框前面
+  container.insertBefore(cardContainer, urlInput);
+  
+  // 生成商品卡片
+  generateProductCards(products, 'productsGrid', urlInput);
+  
+  // 隱藏原始的URL輸入框，但保留功能
+  urlInput.style.display = 'none';
+}
+
+// 建立標準商品選擇器
+function createStandardProductSelector(type, products, urlInput) {
+  // 建立下拉選單
+  const selector = document.createElement('select');
+  selector.id = type.id + 'ProductSelector';
+  selector.className = 'product-selector';
+  selector.innerHTML = '<option value="">-- ' + type.label + ' --</option>';
+  
+  // 加入商品選項
+  products.forEach(product => {
+    const option = document.createElement('option');
+    option.value = product.url;
+    option.textContent = `${product.name}${product.variantName ? ' - ' + product.variantName : ''}`;
+    option.dataset.productId = product.productId;
+    option.dataset.image = product.image;
+    selector.appendChild(option);
+  });
+  
+  // 插入選擇器
+  urlInput.parentNode.insertBefore(selector, urlInput);
+  selector.style.marginBottom = '10px';
+  
+  // 選擇時自動填入
+  selector.addEventListener('change', function() {
+    if (this.value) {
+      urlInput.value = this.value;
+      window.showToast('✅ 已選擇：' + this.options[this.selectedIndex].text);
+    }
   });
 }
 
@@ -961,6 +1005,248 @@ window.addEventListener('load', function() {
     console.log('⚠️ 偵測到未初始化，執行備用初始化...');
     initUploadForm();
   }
+
+// 生成商品卡片
+function generateProductCards(products, containerId, urlInput) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  container.innerHTML = products.map(product => `
+    <div class="product-card" onclick="selectProduct('${product.url}', '${product.name}', this)" data-url="${product.url}">
+      <div class="product-image">
+        <img src="${product.image || 'https://placehold.jp/150x150/f8f9fa/333333?text=商品圖片'}" 
+             alt="${product.name}" 
+             onerror="this.src='https://placehold.jp/150x150/f8f9fa/333333?text=無圖片'">
+      </div>
+      <div class="product-info">
+        <h5 class="product-name">${product.name}</h5>
+        ${product.variantName ? `<p class="product-variant">${product.variantName}</p>` : ''}
+        <div class="product-meta">
+          <span class="product-price">$${product.price}</span>
+          <span class="product-date">${formatDate(product.lastPurchaseDate)}</span>
+        </div>
+        ${product.sku ? `<p class="product-sku">SKU: ${product.sku}</p>` : ''}
+      </div>
+      <div class="product-selected-badge">✓ 已選擇</div>
+    </div>
+  `).join('');
+}
+
+
+// 選擇商品（含狀態檢查）
+window.selectProduct = async function(url, name, cardElement, productId) {
+  // 顯示載入狀態
+  cardElement.style.opacity = '0.6';
+  window.showToast('🔍 檢查商品狀態中...');
+  
+  try {
+    // 檢查商品可用性
+    const checkResult = await checkProductStatus(productId);
+    
+    if (!checkResult.available) {
+      // 商品不可用的處理
+      cardElement.style.opacity = '1';
+      cardElement.classList.add('unavailable');
+      window.showToast(`❌ ${name} - ${checkResult.reason}`);
+      return;
+    }
+    
+    // 商品可用，繼續原有邏輯
+    document.querySelectorAll('.product-card.selected').forEach(card => {
+      card.classList.remove('selected');
+    });
+    
+    cardElement.classList.add('selected');
+    cardElement.style.opacity = '1';
+    
+    // 使用檢查後的最新URL
+    const urlInput = document.getElementById('basicProductUrl');
+    if (urlInput) {
+      urlInput.value = checkResult.url || url;
+    }
+    
+    window.showToast(`✅ 已選擇商品：${name}`);
+    
+    // 視覺反饋
+    cardElement.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      cardElement.style.transform = 'scale(1)';
+    }, 150);
+    
+  } catch (error) {
+    cardElement.style.opacity = '1';
+    window.showToast('❌ 檢查商品狀態時發生錯誤');
+    console.error('商品狀態檢查失敗:', error);
+  }
+};
+
+// 前端檢查商品狀態
+async function checkProductStatus(productId) {
+  const response = await fetch(window.OUTFIT_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'checkProductAvailability',
+      productId: productId
+    })
+  });
+  
+  return await response.json();
+}
+
+// 格式化日期
+function formatDate(dateString) {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('zh-TW', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  } catch (e) {
+    return '未知日期';
+  }
+}
+
+// 在投稿表單 CSS 後面新增商品卡片樣式
+function injectProductCardStyles() {
+  const style = document.createElement('style');
+  style.textContent = `
+    .purchased-products-grid {
+      margin: 20px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .products-header h4 {
+      color: #2c3e50;
+      margin-bottom: 5px;
+      font-size: 1.1rem;
+    }
+    
+    .products-header p {
+      color: #7f8c8d;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+    
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    
+    .product-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-color: #667eea;
+    }
+    
+    .product-card.selected {
+      border-color: #27ae60;
+      background: #f0fff4;
+    }
+    
+    .product-image img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    
+    .product-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+      line-height: 1.3;
+    }
+    
+    .product-variant {
+      font-size: 0.8rem;
+      color: #7f8c8d;
+      margin-bottom: 8px;
+    }
+    
+    .product-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    
+    .product-price {
+      font-weight: 600;
+      color: #e74c3c;
+      font-size: 0.9rem;
+    }
+    
+    .product-date {
+      font-size: 0.75rem;
+      color: #95a5a6;
+    }
+    
+    .product-sku {
+      font-size: 0.75rem;
+      color: #bdc3c7;
+      margin: 0;
+    }
+    
+    .product-selected-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #27ae60;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .product-card.selected .product-selected-badge {
+      opacity: 1;
+    }
+    
+    @media (max-width: 768px) {
+      .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+      }
+      
+      .product-card {
+        padding: 10px;
+      }
+      
+      .product-image img {
+        height: 100px;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// 在初始化時注入樣式
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', injectProductCardStyles);
+} else {
+  injectProductCardStyles();
+}
 });
 
 console.log('✅ outfit-upload.js (Google Drive 版) 載入完成');
