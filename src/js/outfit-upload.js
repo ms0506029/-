@@ -691,6 +691,270 @@ async function loadPurchasedProducts() {
   }
 }
 
+// 生成商品卡片
+function generateProductCards(products, containerId, urlInput) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  container.innerHTML = products.map(product => `
+    <div class="product-card" onclick="selectProduct('${product.url}', '${product.name}', this, '${product.productId}')" data-url="${product.url}">
+      <div class="product-image">
+        <img src="${product.image || 'https://placehold.jp/150x150/f8f9fa/333333?text=商品圖片'}" 
+             alt="${product.name}" 
+             onerror="this.src='https://placehold.jp/150x150/f8f9fa/333333?text=無圖片'">
+      </div>
+      <div class="product-info">
+        <h5 class="product-name">${product.name}</h5>
+        ${product.variantName ? `<p class="product-variant">${product.variantName}</p>` : ''}
+        <div class="product-meta">
+          <span class="product-price">$${product.price}</span>
+          <span class="product-date">${formatDate(product.lastPurchaseDate)}</span>
+        </div>
+        ${product.sku ? `<p class="product-sku">SKU: ${product.sku}</p>` : ''}
+      </div>
+      <div class="product-selected-badge">✓ 已選擇</div>
+    </div>
+  `).join('');
+}
+
+// 選擇商品（含狀態檢查）
+window.selectProduct = async function(url, name, cardElement, productId) {
+  // 顯示載入狀態
+  cardElement.style.opacity = '0.6';
+  window.showToast('🔍 檢查商品狀態中...');
+  
+  try {
+    // 檢查商品可用性
+    const checkResult = await checkProductStatus(productId);
+    
+    if (!checkResult.available) {
+      // 商品不可用的處理
+      cardElement.style.opacity = '1';
+      cardElement.classList.add('unavailable');
+      window.showToast(`❌ ${name} - ${checkResult.reason}`);
+      return;
+    }
+    
+    // 商品可用，繼續原有邏輯
+    document.querySelectorAll('.product-card.selected').forEach(card => {
+      card.classList.remove('selected');
+    });
+    
+    cardElement.classList.add('selected');
+    cardElement.style.opacity = '1';
+    
+    // 使用檢查後的最新URL
+    const urlInput = document.getElementById('basicProductUrl');
+    if (urlInput) {
+      urlInput.value = checkResult.url || url;
+    }
+    
+    window.showToast(`✅ 已選擇商品：${name}`);
+    
+    // 視覺反饋
+    cardElement.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      cardElement.style.transform = 'scale(1)';
+    }, 150);
+    
+  } catch (error) {
+    cardElement.style.opacity = '1';
+    window.showToast('❌ 檢查商品狀態時發生錯誤');
+    console.error('商品狀態檢查失敗:', error);
+  }
+};
+
+// 前端檢查商品狀態
+async function checkProductStatus(productId) {
+  const response = await fetch(window.OUTFIT_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'checkProductAvailability',
+      productId: productId
+    })
+  });
+  
+  return await response.json();
+}
+
+// 格式化日期
+function formatDate(dateString) {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('zh-TW', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  } catch (e) {
+    return '未知日期';
+  }
+}
+
+// 在投稿表單 CSS 後面新增商品卡片樣式
+function injectProductCardStyles() {
+  const style = document.createElement('style');
+  style.textContent = `
+    .purchased-products-grid {
+      margin: 20px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .products-header h4 {
+      color: #2c3e50;
+      margin-bottom: 5px;
+      font-size: 1.1rem;
+    }
+    
+    .products-header p {
+      color: #7f8c8d;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+    
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    
+    .product-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-color: #667eea;
+    }
+    
+    .product-card.selected {
+      border-color: #27ae60;
+      background: #f0fff4;
+    }
+    
+    .product-card.unavailable {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #f8f8f8;
+      border-color: #e74c3c;
+    }
+    
+    .product-card.unavailable::after {
+      content: '已下架';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(231, 76, 60, 0.8);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border-radius: 8px;
+    }
+    
+    .product-image img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    
+    .product-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+      line-height: 1.3;
+    }
+    
+    .product-variant {
+      font-size: 0.8rem;
+      color: #7f8c8d;
+      margin-bottom: 8px;
+    }
+    
+    .product-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    
+    .product-price {
+      font-weight: 600;
+      color: #e74c3c;
+      font-size: 0.9rem;
+    }
+    
+    .product-date {
+      font-size: 0.75rem;
+      color: #95a5a6;
+    }
+    
+    .product-sku {
+      font-size: 0.75rem;
+      color: #bdc3c7;
+      margin: 0;
+    }
+    
+    .product-selected-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #27ae60;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .product-card.selected .product-selected-badge {
+      opacity: 1;
+    }
+    
+    @media (max-width: 768px) {
+      .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+      }
+      
+      .product-card {
+        padding: 10px;
+      }
+      
+      .product-image img {
+        height: 100px;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// 在初始化時注入樣式
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', injectProductCardStyles);
+} else {
+  injectProductCardStyles();
+}
+
 
 // 設定強化版商品選擇器
 function setupEnhancedProductSelectors(products) {
@@ -1007,269 +1271,7 @@ window.addEventListener('load', function() {
   }
 
 
-// 生成商品卡片
-function generateProductCards(products, containerId, urlInput) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  
-  container.innerHTML = products.map(product => `
-    <div class="product-card" onclick="selectProduct('${product.url}', '${product.name}', this, '${product.productId}')" data-url="${product.url}">
-      <div class="product-image">
-        <img src="${product.image || 'https://placehold.jp/150x150/f8f9fa/333333?text=商品圖片'}" 
-             alt="${product.name}" 
-             onerror="this.src='https://placehold.jp/150x150/f8f9fa/333333?text=無圖片'">
-      </div>
-      <div class="product-info">
-        <h5 class="product-name">${product.name}</h5>
-        ${product.variantName ? `<p class="product-variant">${product.variantName}</p>` : ''}
-        <div class="product-meta">
-          <span class="product-price">$${product.price}</span>
-          <span class="product-date">${formatDate(product.lastPurchaseDate)}</span>
-        </div>
-        ${product.sku ? `<p class="product-sku">SKU: ${product.sku}</p>` : ''}
-      </div>
-      <div class="product-selected-badge">✓ 已選擇</div>
-    </div>
-  `).join('');
-}
 
-// 選擇商品（含狀態檢查）
-window.selectProduct = async function(url, name, cardElement, productId) {
-  // 顯示載入狀態
-  cardElement.style.opacity = '0.6';
-  window.showToast('🔍 檢查商品狀態中...');
-  
-  try {
-    // 檢查商品可用性
-    const checkResult = await checkProductStatus(productId);
-    
-    if (!checkResult.available) {
-      // 商品不可用的處理
-      cardElement.style.opacity = '1';
-      cardElement.classList.add('unavailable');
-      window.showToast(`❌ ${name} - ${checkResult.reason}`);
-      return;
-    }
-    
-    // 商品可用，繼續原有邏輯
-    document.querySelectorAll('.product-card.selected').forEach(card => {
-      card.classList.remove('selected');
-    });
-    
-    cardElement.classList.add('selected');
-    cardElement.style.opacity = '1';
-    
-    // 使用檢查後的最新URL
-    const urlInput = document.getElementById('basicProductUrl');
-    if (urlInput) {
-      urlInput.value = checkResult.url || url;
-    }
-    
-    window.showToast(`✅ 已選擇商品：${name}`);
-    
-    // 視覺反饋
-    cardElement.style.transform = 'scale(0.95)';
-    setTimeout(() => {
-      cardElement.style.transform = 'scale(1)';
-    }, 150);
-    
-  } catch (error) {
-    cardElement.style.opacity = '1';
-    window.showToast('❌ 檢查商品狀態時發生錯誤');
-    console.error('商品狀態檢查失敗:', error);
-  }
-};
-
-// 前端檢查商品狀態
-async function checkProductStatus(productId) {
-  const response = await fetch(window.OUTFIT_SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      action: 'checkProductAvailability',
-      productId: productId
-    })
-  });
-  
-  return await response.json();
-}
-
-// 格式化日期
-function formatDate(dateString) {
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('zh-TW', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
-  } catch (e) {
-    return '未知日期';
-  }
-}
-
-// 在投稿表單 CSS 後面新增商品卡片樣式
-function injectProductCardStyles() {
-  const style = document.createElement('style');
-  style.textContent = `
-    .purchased-products-grid {
-      margin: 20px 0;
-      padding: 20px;
-      background: #f8f9fa;
-      border-radius: 12px;
-      border-left: 4px solid #667eea;
-    }
-    
-    .products-header h4 {
-      color: #2c3e50;
-      margin-bottom: 5px;
-      font-size: 1.1rem;
-    }
-    
-    .products-header p {
-      color: #7f8c8d;
-      margin-bottom: 20px;
-      font-size: 0.9rem;
-    }
-    
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 15px;
-    }
-    
-    .product-card {
-      background: white;
-      border-radius: 8px;
-      padding: 15px;
-      cursor: pointer;
-      transition: all 0.3s;
-      border: 2px solid transparent;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .product-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      border-color: #667eea;
-    }
-    
-    .product-card.selected {
-      border-color: #27ae60;
-      background: #f0fff4;
-    }
-    
-    .product-card.unavailable {
-      opacity: 0.5;
-      cursor: not-allowed;
-      background: #f8f8f8;
-      border-color: #e74c3c;
-    }
-    
-    .product-card.unavailable::after {
-      content: '已下架';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(231, 76, 60, 0.8);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      border-radius: 8px;
-    }
-    
-    .product-image img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 6px;
-      margin-bottom: 10px;
-    }
-    
-    .product-name {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #2c3e50;
-      margin-bottom: 5px;
-      line-height: 1.3;
-    }
-    
-    .product-variant {
-      font-size: 0.8rem;
-      color: #7f8c8d;
-      margin-bottom: 8px;
-    }
-    
-    .product-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 5px;
-    }
-    
-    .product-price {
-      font-weight: 600;
-      color: #e74c3c;
-      font-size: 0.9rem;
-    }
-    
-    .product-date {
-      font-size: 0.75rem;
-      color: #95a5a6;
-    }
-    
-    .product-sku {
-      font-size: 0.75rem;
-      color: #bdc3c7;
-      margin: 0;
-    }
-    
-    .product-selected-badge {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #27ae60;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    
-    .product-card.selected .product-selected-badge {
-      opacity: 1;
-    }
-    
-    @media (max-width: 768px) {
-      .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 10px;
-      }
-      
-      .product-card {
-        padding: 10px;
-      }
-      
-      .product-image img {
-        height: 100px;
-      }
-    }
-  `;
-  document.head.appendChild(style);
-}
-
-// 在初始化時注入樣式
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', injectProductCardStyles);
-} else {
-  injectProductCardStyles();
-}
 });
 
 console.log('✅ outfit-upload.js (Google Drive 版) 載入完成');
