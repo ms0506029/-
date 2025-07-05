@@ -8,15 +8,20 @@
   
   console.log('🚀 穿搭牆模組 v4.0 載入中...');
   
+  
   // 儲存穿搭資料和當前模態框資料
   let outfitData = [];
   let currentModal = null;
-
   let userInteractions = {};
   let isLoadingInteractions = false;
-
+  
+  // 🔴 確保這兩行在這裡，而不是在函數內部
   let memberVerified = false;
   let memberData = null;
+  
+  // 🔴 並且要設為 window 物件的屬性，讓其他地方可以存取
+  window.memberVerified = false;
+  window.memberData = null;
   
   
   // 新增：按鈕點擊反饋函式
