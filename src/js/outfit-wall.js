@@ -169,6 +169,9 @@
       if (result.success && result.isLoggedIn) {
         memberVerified = true;
         memberData = result.memberData;
+        // 🔴 同時更新 window 物件
+        window.memberVerified = true;
+        window.memberData = result.memberData;
         userInteractions = result.interactions || {};
         
         console.log('✅ 會員驗證成功:', memberData.name);
