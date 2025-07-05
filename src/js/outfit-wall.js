@@ -945,10 +945,10 @@ window.handleInteraction = function(index, interactionType, button) {
       button.classList.add(classMap[interactionType]);
       
       // 更新本地互動記錄
-      if (!userInteractions[outfitId]) {
-        userInteractions[outfitId] = {};
+      if (!window.userInteractions[outfitId]) {
+        window.userInteractions[outfitId] = {};
       }
-      userInteractions[outfitId][interactionType] = true;
+      window.userInteractions[outfitId][interactionType] = true;
       
       // 更新 outfitData
       const countMap = {
