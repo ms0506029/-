@@ -887,7 +887,8 @@ if (modalUserInfo) {
   }
 // ===== 新增快速互動函數（加在 outfit-wall.js 底部）=====
 window.handleInteraction = function(index, interactionType, button) {
-  if (!memberVerified || !memberData) {
+  // 🔴 修正：使用與電腦版相同的驗證邏輯
+  if (!window.memberVerified || !window.memberData) {
     window.showToast('❌ 請先登入會員才能互動');
     setTimeout(() => {
       window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
@@ -899,10 +900,10 @@ window.handleInteraction = function(index, interactionType, button) {
   if (!outfit) return;
   
   const outfitId = outfit['投稿ID'];
-  const memberEmail = memberData.email;
+  const memberEmail = window.memberData.email; // 🔴 修正：使用 window.memberData
   
   // 檢查是否已經互動過
-  if (userInteractions[outfitId] && userInteractions[outfitId][interactionType]) {
+  if (window.userInteractions[outfitId] && window.userInteractions[outfitId][interactionType]) {
     const messages = {
       'like': '您已經按過愛心了',
       'reference': '您已經標記過參考了',
