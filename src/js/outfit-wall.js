@@ -125,38 +125,44 @@
         isLoadingInteractions = false;
       });
   }
-  // 新增：驗證會員登入
+
+  // 新增：驗證會員登入（強化版）
   async function verifyMemberLogin() {
     try {
-      // 嘗試各種方式取得 email
+      console.log('🔍 開始會員驗證流程...');
+      
+      // 多重檢查取得 email
       let memberEmail = null;
       
-      // 方法1：從 window 變數
+      // 方法1：從 window.customerInfo
       if (window.customerInfo && window.customerInfo.email) {
         memberEmail = window.customerInfo.email;
+        console.log('✅ 方法1成功：window.customerInfo.email =', memberEmail);
       }
-      // 方法2：從 EasyStore customer 物件
-      else if (typeof customer !== 'undefined' && customer && customer.email) {
-        memberEmail = customer.email;
+      // 方法2：從 window.customer  
+      else if (window.customer && window.customer.email) {
+        memberEmail = window.customer.email;
+        console.log('✅ 方法2成功：window.customer.email =', memberEmail);
       }
-      // 方法3：從 Liquid 注入的 meta 標籤
+      // 方法3：從 meta 標籤
       else {
         const metaEmail = document.querySelector('meta[name="customer-email"]');
-        if (metaEmail) {
+        if (metaEmail && metaEmail.content) {
           memberEmail = metaEmail.content;
+          console.log('✅ 方法3成功：meta標籤 =', memberEmail);
         }
       }
       
       if (!memberEmail) {
-        console.log('未偵測到登入狀態');
+        console.log('❌ 無法取得會員Email，設為未登入');
         memberVerified = false;
         window.memberVerified = false;
         return;
       }
       
-      console.log('偵測到會員 Email:', memberEmail);
+      console.log('📧 準備驗證會員:', memberEmail);
       
-      // 🔴 改用 GET 請求
+      // 呼叫 Google Apps Script 驗證
       const url = `${window.OUTFIT_SCRIPT_URL}?action=verifyMemberAndGetData&email=${encodeURIComponent(memberEmail)}`;
       
       const response = await fetch(url, {
@@ -165,12 +171,13 @@
       });
       
       const result = await response.json();
+      console.log('🔍 驗證結果:', result);
       
       if (result.success && result.isLoggedIn) {
         memberVerified = true;
         memberData = result.memberData;
         
-        // 同時更新 window 物件
+        // 更新全域變數
         window.memberVerified = true;
         window.memberData = result.memberData;
         
@@ -179,18 +186,18 @@
         console.log('✅ 會員驗證成功:', memberData.name);
         window.showToast('👋 歡迎回來，' + memberData.name);
         
-        // 更新所有按鈕狀態
+        // 更新按鈕狀態
         if (outfitData.length > 0) {
           updateAllInteractionButtons();
         }
       } else {
+        console.log('❌ 會員驗證失敗:', result.error || '未知錯誤');
         memberVerified = false;
         window.memberVerified = false;
-        console.log('❌ 會員驗證失敗');
       }
       
     } catch (error) {
-      console.error('會員驗證錯誤:', error);
+      console.error('❌ 會員驗證錯誤:', error);
       memberVerified = false;
       window.memberVerified = false;
     }
