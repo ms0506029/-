@@ -150,18 +150,18 @@
       if (!memberEmail) {
         console.log('未偵測到登入狀態');
         memberVerified = false;
+        window.memberVerified = false;
         return;
       }
       
       console.log('偵測到會員 Email:', memberEmail);
       
-      // 使用 API 驗證並取得資料
-      const response = await fetch(window.OUTFIT_SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'verifyMemberAndGetData',
-          email: memberEmail
-        })
+      // 🔴 改用 GET 請求
+      const url = `${window.OUTFIT_SCRIPT_URL}?action=verifyMemberAndGetData&email=${encodeURIComponent(memberEmail)}`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        mode: 'cors'
       });
       
       const result = await response.json();
@@ -169,9 +169,11 @@
       if (result.success && result.isLoggedIn) {
         memberVerified = true;
         memberData = result.memberData;
-        // 🔴 同時更新 window 物件
+        
+        // 同時更新 window 物件
         window.memberVerified = true;
         window.memberData = result.memberData;
+        
         userInteractions = result.interactions || {};
         
         console.log('✅ 會員驗證成功:', memberData.name);
@@ -183,12 +185,14 @@
         }
       } else {
         memberVerified = false;
+        window.memberVerified = false;
         console.log('❌ 會員驗證失敗');
       }
       
     } catch (error) {
       console.error('會員驗證錯誤:', error);
       memberVerified = false;
+      window.memberVerified = false;
     }
   }
   
@@ -1022,42 +1026,36 @@ window.quickPurchase = function(index, button) {
 function saveInteraction(index, interactionType, newCount) {
   const outfit = outfitData[index];
   const outfitId = outfit['投稿ID'];
-  const memberEmail = window.customerInfo.email;
+  const memberEmail = window.memberData.email;
   
-  // 發送到後端
-  fetch(window.OUTFIT_SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      action: 'handleInteraction',
-      memberEmail: memberEmail,
-      submissionId: outfitId,
-      interactionType: interactionType
-    })
-  })
-  .then(response => response.json())
-  .then(result => {
-    if (result.success) {
-      // 更新本地記錄
-      if (!userInteractions[outfitId]) {
-        userInteractions[outfitId] = {};
+  // 🔴 改用 GET 請求
+  const url = `${window.OUTFIT_SCRIPT_URL}?action=handleInteraction&memberEmail=${encodeURIComponent(memberEmail)}&submissionId=${encodeURIComponent(outfitId)}&interactionType=${interactionType}`;
+  
+  fetch(url)
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        // 更新本地記錄
+        if (!userInteractions[outfitId]) {
+          userInteractions[outfitId] = {};
+        }
+        userInteractions[outfitId][interactionType] = true;
+        
+        // 更新 outfitData
+        const countMap = {
+          'like': '按讚數',
+          'reference': '參考數',
+          'purchase': '購買數'
+        };
+        outfit[countMap[interactionType]] = result.newCount || newCount;
+        
+        console.log(`✅ 成功保存 ${interactionType} 互動`);
       }
-      userInteractions[outfitId][interactionType] = true;
-      
-      // 更新 outfitData
-      const countMap = {
-        'like': '按讚數',
-        'reference': '參考數',
-        'purchase': '購買數'
-      };
-      outfit[countMap[interactionType]] = result.newCount || newCount;
-      
-      console.log(`✅ 成功保存 ${interactionType} 互動`);
-    }
-  })
-  .catch(error => {
-    console.error('保存互動失敗:', error);
-    window.showToast('❌ 網路錯誤，互動可能未保存');
-  });
+    })
+    .catch(error => {
+      console.error('保存互動失敗:', error);
+      window.showToast('❌ 網路錯誤，互動可能未保存');
+    });
 }
 
 // 在檔案結尾，})(); 之前加入：
