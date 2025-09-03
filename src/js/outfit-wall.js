@@ -870,6 +870,15 @@ if (modalUserInfo) {
       if (!confirm(`確定要投票給「${outfit['顯示名稱'] || outfit['會員Email']}」的穿搭嗎？\n投票後無法取消。`)) {
         return;
       }
+      let countSpan = button.querySelector('.count');
+      if (!countSpan) {
+        // 如果是 Modal 中的投票按鈕，使用 ID 查找
+        countSpan = document.getElementById('modalVoteCount');
+        if (!countSpan) {
+          console.error('找不到投票計數元素');
+          return;
+        }
+      }
       
       // 禁用按鈕，防止重複點擊
       button.disabled = true;
