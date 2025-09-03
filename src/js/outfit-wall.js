@@ -418,6 +418,7 @@ if (modalUserInfo) {
     // 顯示模態框
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    }
   
   // 新增：顯示商品資訊
   function displayProductInfo(outfit) {
