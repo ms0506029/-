@@ -107,6 +107,7 @@
       loadApprovedOutfits();
     }, 1000);
   }
+  
   function loadUserInteractions(memberEmail) {
     console.log('載入用戶互動記錄:', memberEmail);
     isLoadingInteractions = true;
@@ -411,7 +412,6 @@ if (modalUserInfo) {
     }
      
     // 更新投票按鈕狀態
-    
     const hasVoted = userInteractions[outfitId]?.vote || false;
     updateModalVoteButton(outfit, hasVoted);
     
@@ -560,119 +560,6 @@ if (modalUserInfo) {
       window.currentModal = null;
     }
   }
-  
-  
-  // 互動功能（升級版帶反饋）
-  function likeOutfit(index) {
-    const countElement = document.getElementById('modalLoveCount');
-    const buttonElement = event.target.closest('.action-btn');
-  
-    // 🔴 新增：檢查登入狀態
-    if (!memberVerified || !memberData) {
-      window.showToast('❌ 請先登入會員才能互動');
-      setTimeout(() => {
-        window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
-      }, 1500);
-      return;
-    }
-  
-    // 🔴 新增：檢查是否已經互動過
-    const outfit = window.outfitData[index];
-    const outfitId = outfit['投稿ID'];
-    if (userInteractions[outfitId] && userInteractions[outfitId]['like']) {
-      window.showToast('ℹ️ 您已經按過愛心了');
-      return;
-    }
-  
-    if (countElement && buttonElement) {
-      window.addButtonFeedback(buttonElement);
-      
-      let currentCount = parseInt(countElement.textContent) || 0;
-      
-      // 🔴 修改：只能增加，不能減少
-      currentCount += 1;
-      countElement.textContent = currentCount;
-      buttonElement.classList.add('liked');
-      window.showToast('❤️ 已按讚！');
-      
-      // 🔴 新增：呼叫保存函數
-      saveInteraction(index, 'like', currentCount);
-    }
-  }
-
-  function referenceOutfit(index) {
-    const countElement = document.getElementById('modalRefCount');
-    const buttonElement = event.target.closest('.action-btn');
-  
-    // 🔴 新增：檢查登入狀態
-    if (!memberVerified || !memberData) {
-      window.showToast('❌ 請先登入會員才能互動');
-      setTimeout(() => {
-        window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
-      }, 1500);
-      return;
-    }
-  
-    // 🔴 新增：檢查是否已經互動過
-    const outfit = window.outfitData[index];
-    const outfitId = outfit['投稿ID'];
-    if (userInteractions[outfitId] && userInteractions[outfitId]['reference']) {
-      window.showToast('ℹ️ 您已經標記過參考了');
-      return;
-    }
-  
-    if (countElement && buttonElement) {
-      window.addButtonFeedback(buttonElement);
-      
-      let currentCount = parseInt(countElement.textContent) || 0;
-      
-      // 🔴 修改：只能增加
-      currentCount += 1;
-      countElement.textContent = currentCount;
-      buttonElement.classList.add('referenced');
-      window.showToast('💡 標記為很有參考價值！');
-      
-      // 🔴 新增：呼叫保存函數
-      saveInteraction(index, 'reference', currentCount);
-    }
-  }
-
-  function purchaseOutfit(index) {
-    const countElement = document.getElementById('modalPurchaseCount');
-    const buttonElement = event.target.closest('.action-btn');
-  
-    // 🔴 新增：檢查登入狀態
-    if (!memberVerified || !memberData) {
-      window.showToast('❌ 請先登入會員才能互動');
-      setTimeout(() => {
-        window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
-      }, 1500);
-      return;
-    }
-  
-    // 🔴 新增：檢查是否已經互動過
-    const outfit = window.outfitData[index];
-    const outfitId = outfit['投稿ID'];
-    if (userInteractions[outfitId] && userInteractions[outfitId]['purchase']) {
-      window.showToast('ℹ️ 您已經標記過購買了');
-      return;
-    }
-  
-    if (countElement && buttonElement) {
-      window.addButtonFeedback(buttonElement);
-      
-      let currentCount = parseInt(countElement.textContent) || 0;
-      
-      // 🔴 修改：只能增加
-      currentCount += 1;
-      countElement.textContent = currentCount;
-      buttonElement.classList.add('purchased');
-      window.showToast('🛒 已標記購買同款！');
-      
-      // 🔴 新增：呼叫保存函數
-      saveInteraction(index, 'purchase', currentCount);
-    }
-  }
 
  // 載入已通過審核的穿搭
   function loadApprovedOutfits() {
@@ -818,8 +705,6 @@ if (modalUserInfo) {
         card += '<div class="product-badge">🛍️ 含商品資訊</div>';
       }
       
-      // 手機端互動按鈕
-      // 手機端互動按鈮（包含投票）
       // 手機端互動按鈕（包含投票）
       card += '<div class="outfit-actions-mobile">';
       card += `<button class="action-btn-mobile vote-btn-mobile ${hasVoted ? 'voted' : ''}" onclick="handleInteraction(${i}, 'vote', this)" data-outfit-id="${outfitId}" data-interaction-type="vote">`;
@@ -872,6 +757,70 @@ if (modalUserInfo) {
     grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #e74c3c;"><h3>❌ 載入失敗</h3><p>' + message + '</p><button onclick="location.reload()" style="background: #667eea; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;">重新載入頁面</button></div>';
   }
   
+  // 輔助函數：取得互動按鈕的 CSS class
+  function getInteractionClass(interactionType) {
+    const classMap = {
+      'like': 'liked',
+      'reference': 'referenced',
+      'purchase': 'purchased',
+      'vote': 'voted'
+    };
+    return classMap[interactionType];
+  }
+  
+  // 更新模態框中的計數
+  function updateModalCounts(outfit) {
+    const modalLoveCount = document.getElementById('modalLoveCount');
+    const modalRefCount = document.getElementById('modalRefCount');
+    const modalPurchaseCount = document.getElementById('modalPurchaseCount');
+    const modalVoteCount = document.getElementById('modalVoteCount');
+    
+    if (modalLoveCount) modalLoveCount.textContent = outfit['按讚數'] || 0;
+    if (modalRefCount) modalRefCount.textContent = outfit['參考數'] || 0;
+    if (modalPurchaseCount) modalPurchaseCount.textContent = outfit['購買數'] || 0;
+    if (modalVoteCount) modalVoteCount.textContent = outfit['投票數'] || 0;
+  }
+  
+  // 更新 Modal 投票按鈕狀態
+  function updateModalVoteButton(outfit, hasVoted) {
+    const modalVoteBtn = document.getElementById('modalVoteBtn');
+    const modalVoteCount = document.getElementById('modalVoteCount');
+    
+    if (modalVoteBtn && modalVoteCount) {
+      const voteCount = outfit['投票數'] || 0;
+      modalVoteCount.textContent = voteCount;
+      
+      if (hasVoted) {
+        modalVoteBtn.classList.add('voted');
+        modalVoteBtn.innerHTML = `<span>✅</span><span id="modalVoteCount">${voteCount}</span>已投票`;
+        modalVoteBtn.disabled = true; // 投票後禁用
+      } else {
+        modalVoteBtn.classList.remove('voted');
+        modalVoteBtn.innerHTML = `<span>🗳️</span><span id="modalVoteCount">${voteCount}</span>投票支持`;
+        modalVoteBtn.disabled = false;
+      }
+    }
+  }
+
+  // 更新所有互動按鈕狀態
+  function updateAllInteractionButtons() {
+    // 更新手機端按鈕
+    document.querySelectorAll('.action-btn-mobile').forEach(button => {
+      const outfitId = button.getAttribute('data-outfit-id');
+      const interactionType = button.getAttribute('data-interaction-type');
+      
+      if (userInteractions[outfitId] && userInteractions[outfitId][interactionType]) {
+        const classMap = {
+          'like': 'liked',
+          'reference': 'referenced',
+          'purchase': 'purchased',
+          'vote': 'voted'
+        };
+        button.classList.add(classMap[interactionType]);
+      }
+    });
+  }
+  
   // 設定全域函數
   window.loadApprovedOutfits = loadApprovedOutfits;
   window.displayOutfits = displayOutfits;
@@ -879,9 +828,6 @@ if (modalUserInfo) {
   window.showError = showError;
   window.openModal = openModal;
   window.closeModal = closeModal;
-  window.likeOutfit = likeOutfit;
-  window.referenceOutfit = referenceOutfit;
-  window.purchaseOutfit = purchaseOutfit;
   window.currentModal = currentModal;
   
   // 初始化
@@ -890,336 +836,228 @@ if (modalUserInfo) {
   } else {
     initOutfitWall();
   }
-// ===== 新增快速互動函數（加在 outfit-wall.js 底部）=====
-window.handleInteraction = function(index, interactionType, button) {
-  // 檢查登入狀態
-  if (!window.memberVerified || !window.memberData) {
-    window.showToast('❌ 請先登入會員才能互動');
-    setTimeout(() => {
-      window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
-    }, 1500);
-    return;
-  }
-  
-  const outfit = window.outfitData[index];
-  if (!outfit) return;
-  
-  const submissionId = outfit['投稿ID'];
-  const memberEmail = window.memberData.email;
-  const countSpan = button.querySelector('.count');
-  
-  // 檢查當前狀態
-  const hasInteracted = window.userInteractions[submissionId]?.[interactionType] || false;
-  let currentCount = parseInt(countSpan.textContent) || 0;
-  
-  // 🔴 投票邏輯：只能投票，不能取消
-  if (interactionType === 'vote') {
+
+  // ===== 主要互動處理函數 =====
+  window.handleInteraction = function(index, interactionType, button) {
+    // 檢查登入狀態
+    if (!window.memberVerified || !window.memberData) {
+      window.showToast('❌ 請先登入會員才能互動');
+      setTimeout(() => {
+        window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
+      }, 1500);
+      return;
+    }
+    
+    const outfit = window.outfitData[index];
+    if (!outfit) return;
+    
+    const submissionId = outfit['投稿ID'];
+    const memberEmail = window.memberData.email;
+    const countSpan = button.querySelector('.count');
+    
+    // 檢查當前狀態
+    const hasInteracted = window.userInteractions[submissionId]?.[interactionType] || false;
+    let currentCount = parseInt(countSpan.textContent) || 0;
+    
+    // 🔴 投票邏輯：只能投票，不能取消
+    if (interactionType === 'vote') {
+      if (hasInteracted) {
+        window.showToast('ℹ️ 您已經投過票了');
+        return;
+      }
+      
+      // 顯示確認框
+      if (!confirm(`確定要投票給「${outfit['顯示名稱'] || outfit['會員Email']}」的穿搭嗎？\n投票後無法取消。`)) {
+        return;
+      }
+      
+      // 禁用按鈕，防止重複點擊
+      button.disabled = true;
+      const originalText = button.innerHTML;
+      
+      // 發送投票請求到後端
+      fetch(window.OUTFIT_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'handleInteraction',
+          memberEmail: memberEmail,
+          submissionId: submissionId,
+          interactionType: interactionType
+        })
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.success) {
+          // 更新本地狀態
+          currentCount = result.newCount;
+          countSpan.textContent = currentCount;
+          button.classList.add('voted');
+          
+          // 更新本地互動記錄
+          if (!window.userInteractions[submissionId]) {
+            window.userInteractions[submissionId] = {};
+          }
+          window.userInteractions[submissionId][interactionType] = true;
+          
+          // 更新 outfitData
+          outfit['投票數'] = currentCount;
+          
+          // 同步更新 Modal（如果開啟中）
+          if (window.currentModal === index) {
+            updateModalVoteButton(outfit, true);
+          }
+          
+          window.showToast('🗳️ 投票成功！');
+        } else {
+          window.showToast('❌ 投票失敗：' + (result.error || '未知錯誤'));
+        }
+      })
+      .catch(error => {
+        console.error('投票錯誤:', error);
+        window.showToast('❌ 網路錯誤，請稍後再試');
+      })
+      .finally(() => {
+        // 重新啟用按鈕
+        button.disabled = false;
+      });
+      
+      return;
+    }
+    
+    // 🔴 其他互動邏輯：可以切換（取消/新增）
     if (hasInteracted) {
-      window.showToast('ℹ️ 您已經投過票了');
-      return;
+      // 取消互動
+      currentCount = Math.max(0, currentCount - 1);
+      countSpan.textContent = currentCount;
+      button.classList.remove(getInteractionClass(interactionType));
+      window.userInteractions[submissionId][interactionType] = false;
+      
+      // 顯示取消訊息
+      const cancelMessages = {
+        'like': '💔 已取消按讚',
+        'reference': '📝 已取消參考標記', 
+        'purchase': '🛒 已取消購買標記'
+      };
+      window.showToast(cancelMessages[interactionType]);
+      
+    } else {
+      // 新增互動
+      currentCount += 1;
+      countSpan.textContent = currentCount;
+      button.classList.add(getInteractionClass(interactionType));
+      
+      if (!window.userInteractions[submissionId]) {
+        window.userInteractions[submissionId] = {};
+      }
+      window.userInteractions[submissionId][interactionType] = true;
+      
+      // 顯示成功訊息
+      const successMessages = {
+        'like': '❤️ 已按讚！',
+        'reference': '💡 標記為很有參考價值！',
+        'purchase': '🛒 已標記購買同款！'
+      };
+      window.showToast(successMessages[interactionType]);
     }
     
-    // 顯示確認框
-    if (!confirm(`確定要投票給「${outfit['顯示名稱'] || outfit['會員Email']}」的穿搭嗎？\n投票後無法取消。`)) {
-      return;
-    }
+    // 更新本地資料
+    const countMap = {
+      'like': '按讚數',
+      'reference': '參考數',
+      'purchase': '購買數'
+    };
+    outfit[countMap[interactionType]] = currentCount;
     
-    // 禁用按鈕，防止重複點擊
-    button.disabled = true;
-    const originalText = button.innerHTML;
-    
-    // 發送投票請求到後端
+    // 同步到後端保存
     fetch(window.OUTFIT_SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify({
         action: 'handleInteraction',
         memberEmail: memberEmail,
         submissionId: submissionId,
-        interactionType: interactionType
+        interactionType: interactionType,
+        isToggle: hasInteracted ? 'cancel' : 'add'
       })
     })
     .then(response => response.json())
     .then(result => {
       if (result.success) {
-        // 更新本地狀態
-        currentCount = result.newCount;
-        countSpan.textContent = currentCount;
-        button.classList.add('voted');
+        const finalCount = result.newCount;
+        countSpan.textContent = finalCount;
+        outfit[countMap[interactionType]] = finalCount;
         
-        // 更新本地互動記錄
-        if (!window.userInteractions[submissionId]) {
-          window.userInteractions[submissionId] = {};
-        }
-        window.userInteractions[submissionId][interactionType] = true;
-        
-        // 更新 outfitData
-        outfit['投票數'] = currentCount;
-        
-        // 同步更新 Modal（如果開啟中）
         if (window.currentModal === index) {
-          updateModalVoteButton(outfit, true);
+          updateModalCounts(outfit);
         }
         
-        window.showToast('🗳️ 投票成功！');
+        console.log(`✅ ${interactionType} 互動已同步到後端，最終計數: ${finalCount}`);
       } else {
-        window.showToast('❌ 投票失敗：' + (result.error || '未知錯誤'));
+        console.error('後端同步失敗:', result.error);
+        window.showToast('⚠️ 資料同步失敗，請重新整理頁面');
       }
     })
     .catch(error => {
-      console.error('投票錯誤:', error);
-      window.showToast('❌ 網路錯誤，請稍後再試');
-    })
-    .finally(() => {
-      // 重新啟用按鈕
-      button.disabled = false;
+      console.error('後端同步錯誤:', error);
+      window.showToast('⚠️ 網路錯誤，互動可能未保存');
     });
     
-    return;
-  }
-  
-  // 🔴 其他互動邏輯：可以切換（取消/新增）
-  if (hasInteracted) {
-    // 取消互動
-    currentCount = Math.max(0, currentCount - 1);
-    countSpan.textContent = currentCount;
-    button.classList.remove(getInteractionClass(interactionType));
-    window.userInteractions[submissionId][interactionType] = false;
-    
-    // 顯示取消訊息
-    const cancelMessages = {
-      'like': '💔 已取消按讚',
-      'reference': '📝 已取消參考標記', 
-      'purchase': '🛒 已取消購買標記'
-    };
-    window.showToast(cancelMessages[interactionType]);
-    
-  } else {
-    // 新增互動
-    currentCount += 1;
-    countSpan.textContent = currentCount;
-    button.classList.add(getInteractionClass(interactionType));
-    
-    if (!window.userInteractions[submissionId]) {
-      window.userInteractions[submissionId] = {};
+    // 同步更新 Modal（如果開啟中）
+    if (window.currentModal === index) {
+      updateModalCounts(outfit);
     }
-    window.userInteractions[submissionId][interactionType] = true;
-    
-    // 顯示成功訊息
-    const successMessages = {
-      'like': '❤️ 已按讚！',
-      'reference': '💡 標記為很有參考價值！',
-      'purchase': '🛒 已標記購買同款！'
-    };
-    window.showToast(successMessages[interactionType]);
-  }
-  
-  // 更新本地資料
-  // 更新本地資料
-  const countMap = {
-    'like': '按讚數',
-    'reference': '參考數',
-    'purchase': '購買數'
   };
-  outfit[countMap[interactionType]] = currentCount;
-  
-  // 同步到後端保存
-  fetch(window.OUTFIT_SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      action: 'handleInteraction',
-      memberEmail: memberEmail,
-      submissionId: submissionId,
-      interactionType: interactionType,
-      isToggle: hasInteracted ? 'cancel' : 'add'
-    })
-  })
-  .then(response => response.json())
-  .then(result => {
-    if (result.success) {
-      const finalCount = result.newCount;
-      countSpan.textContent = finalCount;
-      outfit[countMap[interactionType]] = finalCount;
+
+  // ========== 投票相關函數 ==========
+
+  // 處理 Modal 中的投票
+  window.handleModalVote = function() {
+    if (window.currentModal !== null && window.outfitData[window.currentModal]) {
+      const outfit = window.outfitData[window.currentModal];
+      const outfitId = outfit['投稿ID'];
+      const modalVoteBtn = document.getElementById('modalVoteBtn');
       
-      if (window.currentModal === index) {
-        updateModalCounts(outfit);
-      }
-      
-      console.log(`✅ ${interactionType} 互動已同步到後端，最終計數: ${finalCount}`);
-    } else {
-      console.error('後端同步失敗:', result.error);
-      window.showToast('⚠️ 資料同步失敗，請重新整理頁面');
+      // 使用現有的 handleInteraction 機制
+      handleInteraction(window.currentModal, 'vote', modalVoteBtn);
     }
-  })
-  .catch(error => {
-    console.error('後端同步錯誤:', error);
-    window.showToast('⚠️ 網路錯誤，互動可能未保存');
-  });
-  
-  // 同步更新 Modal（如果開啟中）
-  if (window.currentModal === index) {
-    updateModalCounts(outfit);
-  }
-};
-
-function getInteractionClass(interactionType) {
-  const classMap = {
-    'like': 'liked',
-    'reference': 'referenced',
-    'purchase': 'purchased',
-    'vote': 'voted'
   };
-  return classMap[interactionType];
-}
 
-function updateModalCounts(outfit) {
-  const modalLoveCount = document.getElementById('modalLoveCount');
-  const modalRefCount = document.getElementById('modalRefCount');
-  const modalPurchaseCount = document.getElementById('modalPurchaseCount');
-  const modalVoteCount = document.getElementById('modalVoteCount');
-  
-  if (modalLoveCount) modalLoveCount.textContent = outfit['按讚數'] || 0;
-  if (modalRefCount) modalRefCount.textContent = outfit['參考數'] || 0;
-  if (modalPurchaseCount) modalPurchaseCount.textContent = outfit['購買數'] || 0;
-  if (modalVoteCount) modalVoteCount.textContent = outfit['投票數'] || 0;
-}
-// 新增：保存互動到後端的輔助函數
-function saveInteraction(index, interactionType, newCount) {
-  const outfit = window.outfitData[index];
-  const outfitId = outfit['投稿ID'];
-  const memberEmail = window.memberData.email;
-  
-  // 🔴 改用 GET 請求
-  const url = `${window.OUTFIT_SCRIPT_URL}?action=handleInteraction&memberEmail=${encodeURIComponent(memberEmail)}&submissionId=${encodeURIComponent(outfitId)}&interactionType=${interactionType}`;
-  
-  fetch(url)
-    .then(response => response.json())
-    .then(result => {
-      if (result.success) {
-        // 更新本地記錄
-        if (!userInteractions[outfitId]) {
-          userInteractions[outfitId] = {};
-        }
-        userInteractions[outfitId][interactionType] = true;
-        
-        // 更新 outfitData
-        const countMap = {
-          'like': '按讚數',
-          'reference': '參考數',
-          'purchase': '購買數'
-        };
-        outfit[countMap[interactionType]] = result.newCount || newCount;
-        
-        console.log(`✅ 成功保存 ${interactionType} 互動`);
-      }
-    })
-    .catch(error => {
-      console.error('保存互動失敗:', error);
-      window.showToast('❌ 網路錯誤，互動可能未保存');
+  // ========== 作者個人頁面功能 ==========
+
+  window.goToAuthorPage = function(authorName, authorEmail) {
+    const url = `/pages/穿搭作者?author=${encodeURIComponent(authorName)}&email=${encodeURIComponent(authorEmail)}`;
+    window.location.href = url;
+  };
+
+  // 為將來的作者頁面準備：根據作者過濾投稿
+  window.filterOutfitsByAuthor = function(authorEmail) {
+    if (!window.outfitData) return [];
+    
+    return window.outfitData.filter(outfit => {
+      return outfit['會員Email'] === authorEmail;
     });
-}
-
-// 在檔案結尾，})(); 之前加入：
-
-// 更新模態框中的計數
-function updateModalCounts(outfit) {
-  const modalLoveCount = document.getElementById('modalLoveCount');
-  const modalRefCount = document.getElementById('modalRefCount');
-  const modalPurchaseCount = document.getElementById('modalPurchaseCount');
-  
-  if (modalLoveCount) modalLoveCount.textContent = outfit['按讚數'] || 0;
-  if (modalRefCount) modalRefCount.textContent = outfit['參考數'] || 0;
-  if (modalPurchaseCount) modalPurchaseCount.textContent = outfit['購買數'] || 0;
-}
-
-// 更新所有互動按鈕狀態
-function updateAllInteractionButtons() {
-  // 更新手機端按鈕
-  document.querySelectorAll('.action-btn-mobile').forEach(button => {
-    const outfitId = button.getAttribute('data-outfit-id');
-    const interactionType = button.getAttribute('data-interaction-type');
-    
-    if (userInteractions[outfitId] && userInteractions[outfitId][interactionType]) {
-      const classMap = {
-        'like': 'liked',
-        'reference': 'referenced',
-        'purchase': 'purchased',
-        'vote': 'voted'
-      };
-      button.classList.add(classMap[interactionType]);
-    }
-  });
-}
-// ========== 投票相關函數 ==========
-
-// 處理 Modal 中的投票
-window.handleModalVote = function() {
-  if (window.currentModal !== null && window.outfitData[window.currentModal]) {
-    const outfit = window.outfitData[window.currentModal];
-    const outfitId = outfit['投稿ID'];
-    const modalVoteBtn = document.getElementById('modalVoteBtn');
-    
-    // 使用現有的 handleInteraction 機制
-    handleInteraction(window.currentModal, 'vote', modalVoteBtn);
-  }
-};
-
-// 更新 Modal 投票按鈕狀態
-function updateModalVoteButton(outfit, hasVoted) {
-  const modalVoteBtn = document.getElementById('modalVoteBtn');
-  const modalVoteCount = document.getElementById('modalVoteCount');
-  
-  if (modalVoteBtn && modalVoteCount) {
-    const voteCount = outfit['投票數'] || 0;
-    modalVoteCount.textContent = voteCount;
-    
-    if (hasVoted) {
-      modalVoteBtn.classList.add('voted');
-      modalVoteBtn.innerHTML = `<span>✅</span><span id="modalVoteCount">${voteCount}</span>已投票`;
-      modalVoteBtn.disabled = true; // 投票後禁用
-    } else {
-      modalVoteBtn.classList.remove('voted');
-      modalVoteBtn.innerHTML = `<span>🗳️</span><span id="modalVoteCount">${voteCount}</span>投票支持`;
-      modalVoteBtn.disabled = false;
-    }
-  }
-}
-
-// ========== 作者個人頁面功能 ==========
-
-window.goToAuthorPage = function(authorName, authorEmail) {
-  const url = `/pages/穿搭作者?author=${encodeURIComponent(authorName)}&email=${encodeURIComponent(authorEmail)}`;
-  window.location.href = url;
-};
-
-// 為將來的作者頁面準備：根據作者過濾投稿
-window.filterOutfitsByAuthor = function(authorEmail) {
-  if (!window.outfitData) return [];
-  
-  return window.outfitData.filter(outfit => {
-    return outfit['會員Email'] === authorEmail;
-  });
-};
-
-// 為將來的作者頁面準備：取得作者統計
-window.getAuthorStats = function(authorEmail) {
-  const authorOutfits = window.filterOutfitsByAuthor(authorEmail);
-  
-  if (authorOutfits.length === 0) return null;
-  
-  const totalVotes = authorOutfits.reduce((sum, outfit) => {
-    return sum + (parseInt(outfit['投票數']) || 0);
-  }, 0);
-  
-  const totalLikes = authorOutfits.reduce((sum, outfit) => {
-    return sum + (parseInt(outfit['按讚數']) || 0);
-  }, 0);
-  
-  return {
-    totalOutfits: authorOutfits.length,
-    totalVotes: totalVotes,
-    totalLikes: totalLikes,
-    authorName: authorOutfits[0]['顯示名稱'],
-    latestOutfit: authorOutfits[0]['投稿時間']
   };
-};
+
+  // 為將來的作者頁面準備：取得作者統計
+  window.getAuthorStats = function(authorEmail) {
+    const authorOutfits = window.filterOutfitsByAuthor(authorEmail);
+    
+    if (authorOutfits.length === 0) return null;
+    
+    const totalVotes = authorOutfits.reduce((sum, outfit) => {
+      return sum + (parseInt(outfit['投票數']) || 0);
+    }, 0);
+    
+    const totalLikes = authorOutfits.reduce((sum, outfit) => {
+      return sum + (parseInt(outfit['按讚數']) || 0);
+    }, 0);
+    
+    return {
+      totalOutfits: authorOutfits.length,
+      totalVotes: totalVotes,
+      totalLikes: totalLikes,
+      authorName: authorOutfits[0]['顯示名稱'],
+      latestOutfit: authorOutfits[0]['投稿時間']
+    };
+  };
+
 })();
