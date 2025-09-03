@@ -1844,3 +1844,111 @@
     display: none !important;
   }
 }
+/* ========== 投票系統樣式 ========== */
+
+/* 手機端投票按鈕 */
+.vote-btn-mobile {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: 2px solid transparent !important;
+  color: white !important;
+}
+
+.vote-btn-mobile:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6b4190 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.vote-btn-mobile.voted {
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%) !important;
+  border: 2px solid #27ae60 !important;
+}
+
+.vote-btn-mobile .label {
+  font-size: 0.7rem;
+  margin-left: 2px;
+  font-weight: 600;
+}
+
+/* Modal 投票按鈕 */
+.modal-vote-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.modal-vote-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  background: linear-gradient(135deg, #5a6fd8 0%, #6b4190 100%);
+}
+
+.modal-vote-btn.voted {
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+}
+
+.modal-vote-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+  transform: none;
+}
+
+/* 作者名稱可點擊樣式 */
+.author-name-clickable {
+  transition: all 0.2s ease;
+}
+
+.author-name-clickable:hover {
+  color: #5a6fd8 !important;
+  text-shadow: 0 1px 3px rgba(102, 126, 234, 0.3);
+}
+
+/* 投票按鈕響應式設計 */
+@media (max-width: 768px) {
+  .vote-btn-mobile {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .vote-btn-mobile .count {
+    font-size: 0.9rem;
+    font-weight: bold;
+  }
+  
+  .modal-vote-btn {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+}
+
+/* 投票成功動畫效果 */
+@keyframes voteSuccess {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.voted {
+  animation: voteSuccess 0.3s ease-in-out;
+}
+
+/* 投票按鈕 hover 波紋效果 */
+.vote-btn-mobile:active,
+.modal-vote-btn:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
