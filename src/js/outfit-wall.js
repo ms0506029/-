@@ -819,39 +819,27 @@ if (modalUserInfo) {
       }
       
       // 手機端互動按鈕
-      card += `
-        <div class="outfit-actions-mobile">
-          <button class="action-btn-mobile vote-btn-mobile ${hasVoted ? 'voted' : ''}" 
-                  onclick="handleInteraction(${i}, 'vote', this)" 
-                  data-outfit-id="${outfitId}"
-                  data-interaction-type="vote">
-            <span>🗳️</span>
-            <span class="count">${voteCount}</span>
-            <span class="label">投票</span>
-          </button>
-          <button class="action-btn-mobile ${hasLiked ? 'liked' : ''}" 
-                  onclick="handleInteraction(${i}, 'like', this)" 
-                  data-outfit-id="${outfitId}"
-                  data-interaction-type="like">
-            <span>❤️</span>
-            <span class="count">${loveCount}</span>
-          </button>
-          <button class="action-btn-mobile ${hasReferenced ? 'referenced' : ''}" 
-                  onclick="handleInteraction(${i}, 'reference', this)" 
-                  data-outfit-id="${outfitId}"
-                  data-interaction-type="reference">
-            <span>💡</span>
-            <span class="count">${refCount}</span>
-          </button>
-          <button class="action-btn-mobile ${hasPurchased ? 'purchased' : ''}" 
-                  onclick="handleInteraction(${i}, 'purchase', this)" 
-                  data-outfit-id="${outfitId}"
-                  data-interaction-type="purchase">
-            <span>🛒</span>
-            <span class="count">${purchaseCount}</span>
-          </button>
-        </div>
-      `;
+      // 手機端互動按鈮（包含投票）
+      // 手機端互動按鈕（包含投票）
+      card += '<div class="outfit-actions-mobile">';
+      card += `<button class="action-btn-mobile vote-btn-mobile ${hasVoted ? 'voted' : ''}" onclick="handleInteraction(${i}, 'vote', this)" data-outfit-id="${outfitId}" data-interaction-type="vote">`;
+      card += '<span>🗳️</span>';
+      card += `<span class="count">${voteCount}</span>`;
+      card += '<span class="label">投票</span>';
+      card += '</button>';
+      card += `<button class="action-btn-mobile ${hasLiked ? 'liked' : ''}" onclick="handleInteraction(${i}, 'like', this)" data-outfit-id="${outfitId}" data-interaction-type="like">`;
+      card += '<span>❤️</span>';
+      card += `<span class="count">${loveCount}</span>`;
+      card += '</button>';
+      card += `<button class="action-btn-mobile ${hasReferenced ? 'referenced' : ''}" onclick="handleInteraction(${i}, 'reference', this)" data-outfit-id="${outfitId}" data-interaction-type="reference">`;
+      card += '<span>💡</span>';
+      card += `<span class="count">${refCount}</span>`;
+      card += '</button>';
+      card += `<button class="action-btn-mobile ${hasPurchased ? 'purchased' : ''}" onclick="handleInteraction(${i}, 'purchase', this)" data-outfit-id="${outfitId}" data-interaction-type="purchase">`;
+      card += '<span>🛒</span>';
+      card += `<span class="count">${purchaseCount}</span>`;
+      card += '</button>';
+      card += '</div>';
       
       card += '</div>'; // 關閉 outfit-info
       card += '</div>'; // 關閉 outfit-card
@@ -904,7 +892,7 @@ if (modalUserInfo) {
   }
 // ===== 新增快速互動函數（加在 outfit-wall.js 底部）=====
 window.handleInteraction = function(index, interactionType, button) {
-  // 🔴 修正：使用與電腦版相同的驗證邏輯
+  // 檢查登入狀態
   if (!window.memberVerified || !window.memberData) {
     window.showToast('❌ 請先登入會員才能互動');
     setTimeout(() => {
@@ -916,163 +904,184 @@ window.handleInteraction = function(index, interactionType, button) {
   const outfit = window.outfitData[index];
   if (!outfit) return;
   
-  const outfitId = outfit['投稿ID'];
-  const memberEmail = window.memberData.email; // 🔴 修正：使用 window.memberData
+  const submissionId = outfit['投稿ID'];
+  const memberEmail = window.memberData.email;
+  const countSpan = button.querySelector('.count');
   
-  // 檢查是否已經互動過
-  if (window.userInteractions[outfitId] && window.userInteractions[outfitId][interactionType]) {
-    const messages = {
-      'like': '您已經按過愛心了',
-      'reference': '您已經標記過參考了',
-      'purchase': '您已經標記過購買了'
-    };
-    window.showToast('ℹ️ ' + messages[interactionType]);
+  // 檢查當前狀態
+  const hasInteracted = window.userInteractions[submissionId]?.[interactionType] || false;
+  let currentCount = parseInt(countSpan.textContent) || 0;
+  
+  // 🔴 投票邏輯：只能投票，不能取消
+  if (interactionType === 'vote') {
+    if (hasInteracted) {
+      window.showToast('ℹ️ 您已經投過票了');
+      return;
+    }
+    
+    // 顯示確認框
+    if (!confirm(`確定要投票給「${outfit['顯示名稱'] || outfit['會員Email']}」的穿搭嗎？\n投票後無法取消。`)) {
+      return;
+    }
+    
+    // 禁用按鈕，防止重複點擊
+    button.disabled = true;
+    const originalText = button.innerHTML;
+    
+    // 發送投票請求到後端
+    fetch(window.OUTFIT_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'handleInteraction',
+        memberEmail: memberEmail,
+        submissionId: submissionId,
+        interactionType: interactionType
+      })
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        // 更新本地狀態
+        currentCount = result.newCount;
+        countSpan.textContent = currentCount;
+        button.classList.add('voted');
+        
+        // 更新本地互動記錄
+        if (!window.userInteractions[submissionId]) {
+          window.userInteractions[submissionId] = {};
+        }
+        window.userInteractions[submissionId][interactionType] = true;
+        
+        // 更新 outfitData
+        outfit['投票數'] = currentCount;
+        
+        // 同步更新 Modal（如果開啟中）
+        if (window.currentModal === index) {
+          updateModalVoteButton(outfit, true);
+        }
+        
+        window.showToast('🗳️ 投票成功！');
+      } else {
+        window.showToast('❌ 投票失敗：' + (result.error || '未知錯誤'));
+      }
+    })
+    .catch(error => {
+      console.error('投票錯誤:', error);
+      window.showToast('❌ 網路錯誤，請稍後再試');
+    })
+    .finally(() => {
+      // 重新啟用按鈕
+      button.disabled = false;
+    });
+    
     return;
   }
   
-  // 顯示載入狀態
-  button.disabled = true;
-  const originalText = button.innerHTML;
+  // 🔴 其他互動邏輯：可以切換（取消/新增）
+  if (hasInteracted) {
+    // 取消互動
+    currentCount = Math.max(0, currentCount - 1);
+    countSpan.textContent = currentCount;
+    button.classList.remove(getInteractionClass(interactionType));
+    window.userInteractions[submissionId][interactionType] = false;
+    
+    // 顯示取消訊息
+    const cancelMessages = {
+      'like': '💔 已取消按讚',
+      'reference': '📝 已取消參考標記', 
+      'purchase': '🛒 已取消購買標記'
+    };
+    window.showToast(cancelMessages[interactionType]);
+    
+  } else {
+    // 新增互動
+    currentCount += 1;
+    countSpan.textContent = currentCount;
+    button.classList.add(getInteractionClass(interactionType));
+    
+    if (!window.userInteractions[submissionId]) {
+      window.userInteractions[submissionId] = {};
+    }
+    window.userInteractions[submissionId][interactionType] = true;
+    
+    // 顯示成功訊息
+    const successMessages = {
+      'like': '❤️ 已按讚！',
+      'reference': '💡 標記為很有參考價值！',
+      'purchase': '🛒 已標記購買同款！'
+    };
+    window.showToast(successMessages[interactionType]);
+  }
   
-  // 發送互動請求
+  // 更新本地資料
+  // 更新本地資料
+  const countMap = {
+    'like': '按讚數',
+    'reference': '參考數',
+    'purchase': '購買數'
+  };
+  outfit[countMap[interactionType]] = currentCount;
+  
+  // 同步到後端保存
   fetch(window.OUTFIT_SCRIPT_URL, {
     method: 'POST',
     body: JSON.stringify({
       action: 'handleInteraction',
       memberEmail: memberEmail,
-      submissionId: outfitId,
-      interactionType: interactionType
+      submissionId: submissionId,
+      interactionType: interactionType,
+      isToggle: hasInteracted ? 'cancel' : 'add'
     })
   })
   .then(response => response.json())
   .then(result => {
     if (result.success) {
-      // 更新本地資料
-      const countSpan = button.querySelector('.count');
-      if (countSpan) {
-        countSpan.textContent = result.newCount;
-      }
+      const finalCount = result.newCount;
+      countSpan.textContent = finalCount;
+      outfit[countMap[interactionType]] = finalCount;
       
-      // 更新按鈕狀態
-      const classMap = {
-        'like': 'liked',
-        'reference': 'referenced',
-        'purchase': 'purchased'
-      };
-      button.classList.add(classMap[interactionType]);
-      
-      // 更新本地互動記錄
-      if (!window.userInteractions[outfitId]) {
-        window.userInteractions[outfitId] = {};
-      }
-      window.userInteractions[outfitId][interactionType] = true;
-      
-      // 更新 outfitData
-      const countMap = {
-        'like': '按讚數',
-        'reference': '參考數',
-        'purchase': '購買數'
-      };
-      outfit[countMap[interactionType]] = result.newCount;
-      
-      // 顯示成功訊息
-      const successMessages = {
-        'like': '❤️ 已按讚！',
-        'reference': '💡 標記為很有參考價值！',
-        'purchase': '🛒 已標記購買同款！'
-      };
-      window.showToast(successMessages[interactionType]);
-      
-      // 震動反饋
-      if (navigator.vibrate) {
-        navigator.vibrate(50);
-      }
-      
-      // 同步更新模態框中的計數（如果開啟中）
       if (window.currentModal === index) {
         updateModalCounts(outfit);
       }
       
-    } else if (result.alreadyInteracted) {
-      window.showToast('ℹ️ ' + result.error);
+      console.log(`✅ ${interactionType} 互動已同步到後端，最終計數: ${finalCount}`);
     } else {
-      window.showToast('❌ ' + (result.error || '互動失敗'));
+      console.error('後端同步失敗:', result.error);
+      window.showToast('⚠️ 資料同步失敗，請重新整理頁面');
     }
   })
   .catch(error => {
-    console.error('互動失敗:', error);
-    window.showToast('❌ 網路錯誤，請稍後再試');
-  })
-  .finally(() => {
-    button.disabled = false;
+    console.error('後端同步錯誤:', error);
+    window.showToast('⚠️ 網路錯誤，互動可能未保存');
   });
-};
-// 快速按讚（手機端）
-window.quickLike = function(index, button) {
-  const countSpan = button.querySelector('.count');
-  let count = parseInt(countSpan.textContent) || 0;
   
-  if (button.classList.contains('liked')) {
-    count = Math.max(0, count - 1);
-    button.classList.remove('liked');
-    window.showToast('💔 已取消按讚');
-  } else {
-    count += 1;
-    button.classList.add('liked');
-    window.showToast('❤️ 已按讚！');
-  }
-  
-  countSpan.textContent = count;
-  
-  // 震動反饋（如果支援）
-  if (navigator.vibrate) {
-    navigator.vibrate(50);
+  // 同步更新 Modal（如果開啟中）
+  if (window.currentModal === index) {
+    updateModalCounts(outfit);
   }
 };
 
-// 快速標記參考（手機端）
-window.quickReference = function(index, button) {
-  const countSpan = button.querySelector('.count');
-  let count = parseInt(countSpan.textContent) || 0;
-  
-  if (button.classList.contains('referenced')) {
-    count = Math.max(0, count - 1);
-    button.classList.remove('referenced');
-    window.showToast('💡 已取消參考標記');
-  } else {
-    count += 1;
-    button.classList.add('referenced');
-    window.showToast('💡 標記為很有參考價值！');
-  }
-  
-  countSpan.textContent = count;
-  
-  if (navigator.vibrate) {
-    navigator.vibrate(50);
-  }
-};
+function getInteractionClass(interactionType) {
+  const classMap = {
+    'like': 'liked',
+    'reference': 'referenced',
+    'purchase': 'purchased',
+    'vote': 'voted'
+  };
+  return classMap[interactionType];
+}
 
-// 快速購買標記（手機端）
-window.quickPurchase = function(index, button) {
-  const countSpan = button.querySelector('.count');
-  let count = parseInt(countSpan.textContent) || 0;
+function updateModalCounts(outfit) {
+  const modalLoveCount = document.getElementById('modalLoveCount');
+  const modalRefCount = document.getElementById('modalRefCount');
+  const modalPurchaseCount = document.getElementById('modalPurchaseCount');
+  const modalVoteCount = document.getElementById('modalVoteCount');
   
-  if (button.classList.contains('purchased')) {
-    count = Math.max(0, count - 1);
-    button.classList.remove('purchased');
-    window.showToast('🛒 已取消購買標記');
-  } else {
-    count += 1;
-    button.classList.add('purchased');
-    window.showToast('🛒 已標記購買同款！');
-  }
-  
-  countSpan.textContent = count;
-  
-  if (navigator.vibrate) {
-    navigator.vibrate(50);
-  }
-};
+  if (modalLoveCount) modalLoveCount.textContent = outfit['按讚數'] || 0;
+  if (modalRefCount) modalRefCount.textContent = outfit['參考數'] || 0;
+  if (modalPurchaseCount) modalPurchaseCount.textContent = outfit['購買數'] || 0;
+  if (modalVoteCount) modalVoteCount.textContent = outfit['投票數'] || 0;
+}
 // 新增：保存互動到後端的輔助函數
 function saveInteraction(index, interactionType, newCount) {
   const outfit = window.outfitData[index];
@@ -1165,11 +1174,11 @@ function updateModalVoteButton(outfit, hasVoted) {
     
     if (hasVoted) {
       modalVoteBtn.classList.add('voted');
-      modalVoteBtn.innerHTML = '<span>✅</span><span id="modalVoteCount">' + voteCount + '</span>已投票';
-      modalVoteBtn.disabled = true;
+      modalVoteBtn.innerHTML = `<span>✅</span><span id="modalVoteCount">${voteCount}</span>已投票`;
+      modalVoteBtn.disabled = true; // 投票後禁用
     } else {
       modalVoteBtn.classList.remove('voted');
-      modalVoteBtn.innerHTML = '<span>🗳️</span><span id="modalVoteCount">' + voteCount + '</span>投票支持';
+      modalVoteBtn.innerHTML = `<span>🗳️</span><span id="modalVoteCount">${voteCount}</span>投票支持`;
       modalVoteBtn.disabled = false;
     }
   }
