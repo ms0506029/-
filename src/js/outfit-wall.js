@@ -403,19 +403,21 @@ if (modalUserInfo) {
     if (modalSocial) {
       modalSocial.style.display = 'none';
     }
-    
-   
-  
+
     // 重置計數顯示
     const purchaseCountElement = document.getElementById('modalPurchaseCount');
     if (purchaseCountElement) {
       purchaseCountElement.textContent = '0';
     }
+     
+    // 更新投票按鈕狀態
+    const outfitId = outfit['投稿ID'];
+    const hasVoted = userInteractions[outfitId]?.vote || false;
+    updateModalVoteButton(outfit, hasVoted);
     
     // 顯示模態框
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
-  }
   
   // 新增：顯示商品資訊
   function displayProductInfo(outfit) {
@@ -746,17 +748,19 @@ if (modalUserInfo) {
         console.log('跳過非已通過投稿:', name, status);
         continue;
       }
-  
+
       // 讀取實際的計數
       const loveCount = outfit['按讚數'] || 0;
       const refCount = outfit['參考數'] || 0;
       const purchaseCount = outfit['購買數'] || 0;
+      const voteCount = outfit['投票數'] || 0;
       
       // 檢查用戶是否已經互動過
       const outfitId = outfit['投稿ID'];
       const hasLiked = userInteractions[outfitId]?.like || false;
       const hasReferenced = userInteractions[outfitId]?.reference || false;
       const hasPurchased = userInteractions[outfitId]?.purchase || false;
+      const hasVoted = userInteractions[outfitId]?.vote || false;
       
       // 從 Instagram URL 提取用戶名
       let instagramUsername = '';
@@ -785,7 +789,11 @@ if (modalUserInfo) {
       
       // 用戶詳細資訊
       card += '<div class="user-details-compact">';
-      card += '<h3>' + name + ' / ' + height + 'cm';
+      card += '<h3><span class="author-name-clickable" onclick="event.stopPropagation(); goToAuthorPage(\'' + 
+              name.replace(/'/g, "\\'") + '\', \'' + 
+              (outfit['會員Email'] || '').replace(/'/g, "\\'") + '\')" ' +
+              'style="cursor: pointer; color: #667eea; text-decoration: underline; font-weight: bold;">' + 
+              name + '</span> / ' + height + 'cm';
       if (weight) card += ' / ' + weight + 'kg';
       card += '</h3>';
       
@@ -812,6 +820,14 @@ if (modalUserInfo) {
       // 手機端互動按鈕
       card += `
         <div class="outfit-actions-mobile">
+          <button class="action-btn-mobile vote-btn-mobile ${hasVoted ? 'voted' : ''}" 
+                  onclick="handleInteraction(${i}, 'vote', this)" 
+                  data-outfit-id="${outfitId}"
+                  data-interaction-type="vote">
+            <span>🗳️</span>
+            <span class="count">${voteCount}</span>
+            <span class="label">投票</span>
+          </button>
           <button class="action-btn-mobile ${hasLiked ? 'liked' : ''}" 
                   onclick="handleInteraction(${i}, 'like', this)" 
                   data-outfit-id="${outfitId}"
@@ -1116,10 +1132,84 @@ function updateAllInteractionButtons() {
       const classMap = {
         'like': 'liked',
         'reference': 'referenced',
-        'purchase': 'purchased'
+        'purchase': 'purchased',
+        'vote': 'voted'
       };
       button.classList.add(classMap[interactionType]);
     }
   });
 }
+// ========== 投票相關函數 ==========
+
+// 處理 Modal 中的投票
+window.handleModalVote = function() {
+  if (window.currentModal !== null && window.outfitData[window.currentModal]) {
+    const outfit = window.outfitData[window.currentModal];
+    const outfitId = outfit['投稿ID'];
+    const modalVoteBtn = document.getElementById('modalVoteBtn');
+    
+    // 使用現有的 handleInteraction 機制
+    handleInteraction(window.currentModal, 'vote', modalVoteBtn);
+  }
+};
+
+// 更新 Modal 投票按鈕狀態
+function updateModalVoteButton(outfit, hasVoted) {
+  const modalVoteBtn = document.getElementById('modalVoteBtn');
+  const modalVoteCount = document.getElementById('modalVoteCount');
+  
+  if (modalVoteBtn && modalVoteCount) {
+    const voteCount = outfit['投票數'] || 0;
+    modalVoteCount.textContent = voteCount;
+    
+    if (hasVoted) {
+      modalVoteBtn.classList.add('voted');
+      modalVoteBtn.innerHTML = '<span>✅</span><span id="modalVoteCount">' + voteCount + '</span>已投票';
+      modalVoteBtn.disabled = true;
+    } else {
+      modalVoteBtn.classList.remove('voted');
+      modalVoteBtn.innerHTML = '<span>🗳️</span><span id="modalVoteCount">' + voteCount + '</span>投票支持';
+      modalVoteBtn.disabled = false;
+    }
+  }
+}
+
+// ========== 作者個人頁面功能 ==========
+
+window.goToAuthorPage = function(authorName, authorEmail) {
+  const url = `/pages/穿搭作者?author=${encodeURIComponent(authorName)}&email=${encodeURIComponent(authorEmail)}`;
+  window.location.href = url;
+};
+
+// 為將來的作者頁面準備：根據作者過濾投稿
+window.filterOutfitsByAuthor = function(authorEmail) {
+  if (!window.outfitData) return [];
+  
+  return window.outfitData.filter(outfit => {
+    return outfit['會員Email'] === authorEmail;
+  });
+};
+
+// 為將來的作者頁面準備：取得作者統計
+window.getAuthorStats = function(authorEmail) {
+  const authorOutfits = window.filterOutfitsByAuthor(authorEmail);
+  
+  if (authorOutfits.length === 0) return null;
+  
+  const totalVotes = authorOutfits.reduce((sum, outfit) => {
+    return sum + (parseInt(outfit['投票數']) || 0);
+  }, 0);
+  
+  const totalLikes = authorOutfits.reduce((sum, outfit) => {
+    return sum + (parseInt(outfit['按讚數']) || 0);
+  }, 0);
+  
+  return {
+    totalOutfits: authorOutfits.length,
+    totalVotes: totalVotes,
+    totalLikes: totalLikes,
+    authorName: authorOutfits[0]['顯示名稱'],
+    latestOutfit: authorOutfits[0]['投稿時間']
+  };
+};
 })();
