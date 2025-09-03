@@ -411,7 +411,7 @@ if (modalUserInfo) {
     }
      
     // 更新投票按鈕狀態
-    const outfitId = outfit['投稿ID'];
+    
     const hasVoted = userInteractions[outfitId]?.vote || false;
     updateModalVoteButton(outfit, hasVoted);
     
