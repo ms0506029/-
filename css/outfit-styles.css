@@ -1975,34 +1975,69 @@
   margin-left: 8px;
 }
 
-/* 投票徽章樣式 */
+/* 更明顯的投票徽章樣式 */
 .vote-badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(102, 126, 234, 0.9);
+  top: 15px;
+  right: 15px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
   color: white;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.8rem;
+  padding: 10px 15px;
+  border-radius: 20px;
+  font-size: 1rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+  z-index: 10;
+  min-width: 60px;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  opacity: 1; /* 確保一直顯示 */
+  visibility: visible; /* 確保一直可見 */
+  transition: transform 0.2s ease;
 }
 
-/* 響應式顯示 */
-@media (min-width: 768px) {
-  .outfit-vote-info-desktop {
-    display: block !important;
-  }
-  
-  .outfit-actions-mobile {
-    display: none;
-  }
+.vote-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
 }
 
+.vote-badge-icon {
+  font-size: 1.1em;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+}
+
+.vote-badge-count {
+  font-weight: 800;
+  font-size: 1.1em;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* 確保在所有狀態下都顯示 */
+.outfit-card .vote-badge {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+/* 手機端稍微調整 */
 @media (max-width: 767px) {
-  .outfit-vote-info-desktop {
-    display: none !important;
+  .vote-badge {
+    top: 12px;
+    right: 12px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    min-width: 50px;
+  }
+}
+
+/* 桌面端加大 */
+@media (min-width: 768px) {
+  .vote-badge {
+    padding: 12px 18px;
+    font-size: 1.1rem;
+    min-width: 70px;
   }
 }
