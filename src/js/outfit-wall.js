@@ -933,15 +933,69 @@ if (modalUserInfo) {
 
   // ===== 主要互動處理函數 =====
   window.handleInteraction = function(index, interactionType, button) {
-    // 檢查登入狀態
+    // === 智慧會員檢查 ===
     if (!window.memberVerified || !window.memberData) {
-      window.showToast('❌ 請先登入會員才能互動');
-      setTimeout(() => {
-        window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
-      }, 1500);
-      return;
+      console.log('⏳ 會員未驗證，啟動智慧等待...');
+      
+      // 顯示友善的等待訊息
+      window.showToast('⏳ 正在確認會員身份，請稍候...');
+      
+      // 禁用按鈕防止重複點擊
+      if (button) {
+        button.disabled = true;
+        button.style.opacity = '0.6';
+      }
+      
+      // 給予驗證時間（最多等待3秒）
+      let attempts = 0;
+      const maxAttempts = 6; // 3秒 / 0.5秒 = 6次
+      
+      const checkVerification = setInterval(() => {
+        attempts++;
+        console.log(`檢查驗證狀態 ${attempts}/${maxAttempts}:`, window.memberVerified);
+        
+        if (window.memberVerified && window.memberData) {
+          // 驗證完成，重新啟用按鈕並執行互動
+          clearInterval(checkVerification);
+          
+          if (button) {
+            button.disabled = false;
+            button.style.opacity = '1';
+          }
+          
+          console.log('✅ 驗證完成，執行互動');
+          window.showToast('✅ 驗證完成！');
+          
+          // 重新執行互動
+          setTimeout(() => {
+            window.handleInteraction(index, interactionType, button);
+          }, 300);
+          
+          return;
+          
+        } else if (attempts >= maxAttempts) {
+          // 超時，顯示登入提示
+          clearInterval(checkVerification);
+          
+          if (button) {
+            button.disabled = false;
+            button.style.opacity = '1';
+          }
+          
+          console.log('❌ 驗證超時，跳轉登入');
+          window.showToast('❌ 請先登入會員才能互動');
+          
+          setTimeout(() => {
+            window.location.href = '/account/login?return_to=' + encodeURIComponent(window.location.href);
+          }, 2000);
+          
+          return;
+        }
+      }, 500); // 每0.5秒檢查一次
+      
+      return; // 終止當前執行
     }
-    
+      
     const outfit = window.outfitData[index];
     if (!outfit) return;
     
