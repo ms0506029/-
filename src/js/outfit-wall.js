@@ -755,6 +755,13 @@ if (modalUserInfo) {
       let card = '<div class="outfit-card" onclick="openModal(' + i + ')" style="cursor: pointer;">';
       card += '<img src="' + imageUrl + '" alt="' + name + ' 的穿搭" class="outfit-image" onerror="this.src=\'https://placehold.jp/300x350/f8f9fa/333333?text=圖片載入失敗\'">';
       card += '<div class="outfit-info">';
+      // 新增：投票徽章（右上角）
+      if (voteCount > 0) {
+        card += '<div class="vote-badge">';
+        card += `<span class="vote-badge-icon">🗳️</span>`;
+        card += `<span class="vote-badge-count">${voteCount}</span>`;
+        card += '</div>';
+      }
       
       // 用戶資訊區塊
       card += '<div class="user-info-compact">';
@@ -777,6 +784,7 @@ if (modalUserInfo) {
               'style="cursor: pointer; color: #667eea; text-decoration: underline; font-weight: bold;">' + 
               name + '</span> / ' + height + 'cm';
       if (weight) card += ' / ' + weight + 'kg';
+
       card += '</h3>';
       
       // Instagram 顯示
