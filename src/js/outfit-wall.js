@@ -758,8 +758,8 @@ if (modalUserInfo) {
       // 新增：投票徽章（右上角）
       if (voteCount > 0) {
         card += '<div class="vote-badge">';
-        card += `<span class="vote-badge-icon">🗳️</span>`;
-        card += `<span class="vote-badge-count">${voteCount}</span>`;
+        card += '<span class="vote-badge-icon">🗳️</span>';
+        card += '<span class="vote-badge-count">' + voteCount + '</span>';
         card += '</div>';
       }
       
