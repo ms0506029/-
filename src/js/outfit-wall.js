@@ -1058,7 +1058,7 @@ if (modalUserInfo) {
     .finally(() => {
       // 重新啟用按鈕
       button.disabled = false;
-    });
+  });
 
   // ========== 投票相關函數 ==========
 
