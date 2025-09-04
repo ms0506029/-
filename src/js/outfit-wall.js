@@ -854,11 +854,34 @@ if (modalUserInfo) {
     const submissionId = outfit['投稿ID'];
     const memberEmail = window.memberData.email;
     const countSpan = button.querySelector('.count');
-    
+
     // 檢查當前狀態
     const hasInteracted = window.userInteractions[submissionId]?.[interactionType] || false;
-    let currentCount = parseInt(countSpan.textContent) || 0;
     
+    // 🔴 修正：安全的計數取得
+    let currentCount = 0;
+    if (countSpan) {
+      const textContent = countSpan.textContent;
+      if (textContent !== null && textContent !== undefined && textContent !== '') {
+        currentCount = parseInt(textContent) || 0;
+      } else {
+        // 如果 textContent 有問題，從原始數據恢復
+        const outfit = window.outfitData[index];
+        const countMap = {
+          'like': '按讚數',
+          'reference': '參考數',
+          'purchase': '購買數',
+          'vote': '投票數'
+        };
+        currentCount = parseInt(outfit[countMap[interactionType]]) || 0;
+        countSpan.textContent = currentCount; // 修復 DOM
+        console.log(`已修復 ${interactionType} 計數:`, currentCount);
+      }
+    } else {
+      console.error('找不到計數元素');
+      return;
+    }
+        
     // 🔴 投票邏輯：只能投票，不能取消
     if (interactionType === 'vote') {
       if (hasInteracted) {
