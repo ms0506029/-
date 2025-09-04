@@ -1024,6 +1024,12 @@ if (modalUserInfo) {
         });
         const finalCount = result.newCount;
         if (countSpan) countSpan.textContent = finalCount;
+        const countMap = {
+          'like': '按讚數',
+          'reference': '參考數', 
+          'purchase': '購買數',
+          'vote': '投票數'
+        };
         outfit[countMap[interactionType]] = finalCount;
 
         console.log('⚠️ 更新前的userInteractions:', window.userInteractions[submissionId]);
