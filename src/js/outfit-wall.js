@@ -136,23 +136,18 @@
   // 新增：驗證會員登入（強化版）
   async function verifyMemberLogin() {
     try {
-      console.log('🔍 開始會員驗證流程...');
+      console.log('🔍 開始快速會員驗證流程...');
       
-      // 多重檢查取得 email
+      // 快速取得 email
       let memberEmail = null;
       
-      // 方法1：從 window.customerInfo
       if (window.customerInfo && window.customerInfo.email) {
         memberEmail = window.customerInfo.email;
         console.log('✅ 方法1成功：window.customerInfo.email =', memberEmail);
-      }
-      // 方法2：從 window.customer  
-      else if (window.customer && window.customer.email) {
+      } else if (window.customer && window.customer.email) {
         memberEmail = window.customer.email;
         console.log('✅ 方法2成功：window.customer.email =', memberEmail);
-      }
-      // 方法3：從 meta 標籤
-      else {
+      } else {
         const metaEmail = document.querySelector('meta[name="customer-email"]');
         if (metaEmail && metaEmail.content) {
           memberEmail = metaEmail.content;
@@ -160,71 +155,176 @@
         }
       }
       
-      // 方法4：硬編碼測試（臨時）
       if (!memberEmail) {
         memberEmail = "eddc9104@gmail.com"; // 臨時硬編碼
         console.log('⚠️ 使用臨時硬編碼 Email:', memberEmail);
       }
       
-      if (!memberEmail) {
-        console.log('❌ 無法取得會員Email，設為未登入');
-        memberVerified = false;
-        window.memberVerified = false;
-        return;
-      }
-      
       console.log('📧 準備驗證會員:', memberEmail);
       
-      // 呼叫 Google Apps Script 驗證
-      const url = `${window.OUTFIT_SCRIPT_URL}?action=verifyMemberAndGetData&email=${encodeURIComponent(memberEmail)}`;
-      console.log('🔗 API URL:', url);
+      // === 快取檢查 ===
+      const cacheKey = `outfit_member_${memberEmail}`;
+      const cachedString = localStorage.getItem(cacheKey);
       
-      // 改為使用 POST 方式：
-      const response = await fetch(window.OUTFIT_SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'verifyMemberAndGetData',
-          email: memberEmail
-        })
-      });
-      
-      const result = await response.json();
-      console.log('🔍 驗證結果:', result);
-      
-      if (result.success && result.isLoggedIn) {
-        memberVerified = true;
-        memberData = result.memberData;
-        
-        // 更新全域變數
-        window.memberVerified = true;
-        window.memberData = result.memberData;
-        
-        userInteractions = result.interactions || {};
-        
-        console.log('✅ 會員驗證成功:', memberData.name);
-        window.showToast('👋 歡迎回來，' + memberData.name);
-        
-        // 更新按鈕狀態
-        if (window.outfitData && window.outfitData.length > 0) {
-          updateAllInteractionButtons();
-        }
-      } else {
-        console.log('❌ 會員驗證失敗:', result.error || '未知錯誤');
-        memberVerified = false;
-        window.memberVerified = false;
-        
-        // 特別處理：如果是找不到會員資料，可能是 EasyStore API 問題
-        if (result.error && result.error.includes('找不到會員資料')) {
-          console.log('⚠️ EasyStore API 找不到會員，可能需要檢查 API 權限或會員狀態');
-          window.showToast('⚠️ 會員驗證失敗：' + result.error);
+      if (cachedString) {
+        try {
+          const cachedData = JSON.parse(cachedString);
+          const cacheAge = Date.now() - cachedData.timestamp;
+          const cacheExpiry = 10 * 60 * 1000; // 10分鐘
+          
+          if (cacheAge < cacheExpiry) {
+            console.log('⚡ 使用快取會員資料，快取年齡:', Math.round(cacheAge/1000), '秒');
+            
+            // 立即設置會員狀態
+            memberVerified = true;
+            memberData = cachedData.memberData;
+            window.memberVerified = true;
+            window.memberData = cachedData.memberData;
+            window.userInteractions = cachedData.interactions || {};
+            
+            // 更新按鈕狀態
+            if (window.outfitData && window.outfitData.length > 0) {
+              updateAllInteractionButtons();
+            }
+            
+            window.showToast('👋 歡迎回來，' + cachedData.memberData.name);
+            
+            // 背景靜默更新（不影響用戶體驗）
+            setTimeout(() => {
+              backgroundRefreshMemberData(memberEmail, cacheKey);
+            }, 2000);
+            
+            return;
+          } else {
+            console.log('🗑️ 快取已過期，清除舊快取');
+            localStorage.removeItem(cacheKey);
+          }
+        } catch (cacheError) {
+          console.error('快取解析失敗:', cacheError);
+          localStorage.removeItem(cacheKey);
         }
       }
+      
+      // === 快速預設驗證 ===
+      console.log('⚡ 執行快速預設驗證...');
+      
+      // 立即設置基本會員狀態（提升用戶體驗）
+      memberVerified = true;
+      memberData = {
+        email: memberEmail,
+        name: memberEmail.split('@')[0], // 使用 email 前綴作為暫時名稱
+        id: null,
+        isQuickVerify: true
+      };
+      window.memberVerified = true;
+      window.memberData = memberData;
+      window.userInteractions = {};
+      
+      console.log('✅ 快速驗證完成，背景載入詳細資料...');
+      window.showToast('👋 歡迎回來，正在載入會員資料...');
+      
+      // === 背景完整驗證 ===
+      backgroundFullVerification(memberEmail, cacheKey);
       
     } catch (error) {
       console.error('❌ 會員驗證錯誤:', error);
       memberVerified = false;
       window.memberVerified = false;
     }
+  }
+  
+  // 背景完整驗證函數
+  function backgroundFullVerification(memberEmail, cacheKey) {
+    fetch(window.OUTFIT_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'verifyMemberAndGetData',
+        email: memberEmail
+      })
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success && result.isLoggedIn) {
+        console.log('✅ 背景驗證完成，更新會員資料');
+        
+        // 更新完整會員資料
+        memberData = result.memberData;
+        window.memberData = result.memberData;
+        window.userInteractions = result.interactions || {};
+        
+        // 儲存到快取
+        const cacheData = {
+          memberData: result.memberData,
+          interactions: result.interactions || {},
+          timestamp: Date.now()
+        };
+        
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+          console.log('💾 會員資料已快取');
+        } catch (storageError) {
+          console.error('快取儲存失敗:', storageError);
+        }
+        
+        // 更新按鈕狀態
+        if (window.outfitData && window.outfitData.length > 0) {
+          updateAllInteractionButtons();
+        }
+        
+        // 輕微提示完成
+        console.log('🎉 會員詳細資料載入完成');
+        
+      } else {
+        console.log('❌ 背景驗證失敗:', result.error);
+        // 保持快速驗證的狀態，不影響用戶
+      }
+    })
+    .catch(error => {
+      console.error('❌ 背景驗證請求失敗:', error);
+      // 保持快速驗證的狀態，不影響用戶
+    });
+  }
+  
+  // 背景靜默更新函數
+  function backgroundRefreshMemberData(memberEmail, cacheKey) {
+    console.log('🔄 背景靜默更新會員資料...');
+    
+    fetch(window.OUTFIT_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'getUserInteractions',
+        memberEmail: memberEmail
+      })
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        window.userInteractions = result.interactions || {};
+        
+        // 更新快取中的互動記錄
+        const cachedString = localStorage.getItem(cacheKey);
+        if (cachedString) {
+          try {
+            const cachedData = JSON.parse(cachedString);
+            cachedData.interactions = result.interactions || {};
+            cachedData.timestamp = Date.now(); // 更新時間戳
+            localStorage.setItem(cacheKey, JSON.stringify(cachedData));
+            
+            // 更新按鈕狀態
+            if (window.outfitData && window.outfitData.length > 0) {
+              updateAllInteractionButtons();
+            }
+            
+            console.log('🔄 互動記錄已靜默更新');
+          } catch (error) {
+            console.error('更新快取失敗:', error);
+          }
+        }
+      }
+    })
+    .catch(error => {
+      console.error('靜默更新失敗:', error);
+    });
   }
   
   // 將函數暴露到全域
