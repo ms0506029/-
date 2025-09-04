@@ -1952,3 +1952,57 @@
   transform: scale(0.98);
   transition: transform 0.1s ease;
 }
+
+/* 桌面端投票資訊條 */
+.outfit-vote-info-desktop {
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  margin-top: 8px;
+}
+
+.vote-display {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.voted-indicator {
+  color: #28a745;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+/* 投票徽章樣式 */
+.vote-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(102, 126, 234, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* 響應式顯示 */
+@media (min-width: 768px) {
+  .outfit-vote-info-desktop {
+    display: block !important;
+  }
+  
+  .outfit-actions-mobile {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .outfit-vote-info-desktop {
+    display: none !important;
+  }
+}
