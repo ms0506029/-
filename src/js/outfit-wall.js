@@ -967,8 +967,8 @@ if (modalUserInfo) {
       if (countSpan) countSpan.textContent = currentCount;
       button.classList.remove(getInteractionClass(interactionType));
       
-      // ⚠️ 先不要立即更新狀態，等後端確認
-      // window.userInteractions[submissionId][interactionType] = false;
+      // 立即更新本地狀態
+      window.userInteractions[submissionId][interactionType] = false;
       
       // 顯示取消訊息
       const cancelMessages = {
@@ -984,11 +984,11 @@ if (modalUserInfo) {
       if (countSpan) countSpan.textContent = currentCount;
       button.classList.add(getInteractionClass(interactionType));
       
-      // ⚠️ 先不要立即更新狀態，等後端確認
-      // if (!window.userInteractions[submissionId]) {
-      //   window.userInteractions[submissionId] = {};
-      // }
-      // window.userInteractions[submissionId][interactionType] = true;
+      // 立即更新本地狀態
+      if (!window.userInteractions[submissionId]) {
+        window.userInteractions[submissionId] = {};
+      }
+      window.userInteractions[submissionId][interactionType] = true;
       
       // 顯示成功訊息
       const successMessages = {
@@ -999,10 +999,16 @@ if (modalUserInfo) {
       window.showToast(successMessages[interactionType]);
     }
     
-    // 禁用按鈕防止重複點擊
-    button.disabled = true;
+    // 更新本地資料
+    const countMap = {
+      'like': '按讚數',
+      'reference': '參考數',
+      'purchase': '購買數',
+      'vote': '投票數'
+    };
+    outfit[countMap[interactionType]] = currentCount;
     
-    // 同步到後端保存
+    // 同步到後端保存（背景處理，不影響用戶體驗）
     fetch(window.OUTFIT_SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify({
@@ -1015,67 +1021,24 @@ if (modalUserInfo) {
     .then(response => response.json())
     .then(result => {
       if (result.success) {
-        console.log('🔍 後端返回結果:', {
-          interactionType: interactionType,
-          submissionId: submissionId,
-          result: result,
-          'result.hasInteracted': result.hasInteracted,
-          '操作前的狀態': hasInteracted
-        });
+        // 後端成功，確認最終計數
         const finalCount = result.newCount;
-        if (countSpan) countSpan.textContent = finalCount;
-        const countMap = {
-          'like': '按讚數',
-          'reference': '參考數', 
-          'purchase': '購買數',
-          'vote': '投票數'
-        };
-        outfit[countMap[interactionType]] = finalCount;
-
-        console.log('⚠️ 更新前的userInteractions:', window.userInteractions[submissionId]);
-        window.userInteractions[submissionId][interactionType] = result.hasInteracted;
-        console.log('✅ 更新後的userInteractions:', window.userInteractions[submissionId]);
-      
-        // ✅ 只有後端成功後才更新狀態
-        if (!window.userInteractions[submissionId]) {
-          window.userInteractions[submissionId] = {};
+        if (countSpan && countSpan.textContent !== finalCount.toString()) {
+          countSpan.textContent = finalCount;
+          outfit[countMap[interactionType]] = finalCount;
         }
-
-        
-        if (window.currentModal === index) {
-          updateModalCounts(outfit);
-        }
-        
         console.log(`✅ ${interactionType} 互動已同步到後端，最終計數: ${finalCount}`);
       } else {
-        // 恢復原狀態
-        currentCount = hasInteracted ? currentCount + 1 : Math.max(0, currentCount - 1);
-        if (countSpan) countSpan.textContent = currentCount;
-        if (hasInteracted) {
-          button.classList.add(getInteractionClass(interactionType));
-        } else {
-          button.classList.remove(getInteractionClass(interactionType));
-        }
         console.error('後端同步失敗:', result.error);
-        window.showToast('❌ 操作失敗，請稍後再試');
+        // 前端已經更新，不需要回滾，保持良好的用戶體驗
       }
     })
     .catch(error => {
-      // 恢復原狀態
-      currentCount = hasInteracted ? currentCount + 1 : Math.max(0, currentCount - 1);
-      if (countSpan) countSpan.textContent = currentCount;
-      if (hasInteracted) {
-        button.classList.add(getInteractionClass(interactionType));
-      } else {
-        button.classList.remove(getInteractionClass(interactionType));
-      }
       console.error('後端同步錯誤:', error);
-      window.showToast('❌ 網路錯誤，請稍後再試');
-    })
-    .finally(() => {
-      // 重新啟用按鈕
-      button.disabled = false;
+      // 前端已經更新，不需要回滾
     });
+    
+   
     // 同步更新 Modal（如果開啟中）
     if (window.currentModal === index) {
       updateModalCounts(outfit);
