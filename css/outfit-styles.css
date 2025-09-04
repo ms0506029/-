@@ -76,22 +76,25 @@
   padding: 40px 30px;  /* 原本是 30px 20px，增加左右內距 */
 }
 
+/* 完整的卡片統一方案 */
 .outfit-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
-  align-items: start;
+  padding: 20px 0;
 }
 
 .outfit-card {
+  width: 100%;
   background: white;
   border-radius: 12px;
-  margin-bottom: 0px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s;
-  cursor: pointer;
   overflow: hidden;
-  width: 100%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  /* 確保所有卡片高度一致的關鍵 */
+  display: flex;
+  flex-direction: column;
 }
 
 .outfit-card:hover {
@@ -101,13 +104,26 @@
 
 .outfit-image {
   width: 100%;
-  height: auto;
-  display: block;
+  height: 400px; /* 固定高度 */
+  flex-shrink: 0; /* 防止被壓縮 */
   object-fit: cover;
+  object-position: center;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
 .outfit-info {
-  padding: 15px;
+  padding: 16px;
+  flex-grow: 1; /* 填充剩餘空間 */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 小圖片的特殊處理 */
+.outfit-image.small-image {
+  object-fit: contain;
+  background: radial-gradient(circle, #f8f9fa 0%, #e9ecef 100%);
+  padding: 20px; /* 給小圖片一些內邊距 */
+  box-sizing: border-box;
 }
 
 .user-info {
