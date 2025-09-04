@@ -1015,15 +1015,26 @@ if (modalUserInfo) {
     .then(response => response.json())
     .then(result => {
       if (result.success) {
+        console.log('🔍 後端返回結果:', {
+          interactionType: interactionType,
+          submissionId: submissionId,
+          result: result,
+          'result.hasInteracted': result.hasInteracted,
+          '操作前的狀態': hasInteracted
+        });
         const finalCount = result.newCount;
         if (countSpan) countSpan.textContent = finalCount;
         outfit[countMap[interactionType]] = finalCount;
-        
+
+        console.log('⚠️ 更新前的userInteractions:', window.userInteractions[submissionId]);
+        window.userInteractions[submissionId][interactionType] = result.hasInteracted;
+        console.log('✅ 更新後的userInteractions:', window.userInteractions[submissionId]);
+      
         // ✅ 只有後端成功後才更新狀態
         if (!window.userInteractions[submissionId]) {
           window.userInteractions[submissionId] = {};
         }
-        window.userInteractions[submissionId][interactionType] = result.hasInteracted;
+
         
         if (window.currentModal === index) {
           updateModalCounts(outfit);
