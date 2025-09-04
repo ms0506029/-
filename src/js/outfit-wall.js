@@ -753,7 +753,7 @@ if (modalUserInfo) {
       
       // 開始建立卡片
       let card = '<div class="outfit-card" onclick="openModal(' + i + ')" style="cursor: pointer;">';
-      card += '<img src="' + imageUrl + '" alt="' + name + ' 的穿搭" class="outfit-image" onerror="this.src=\'https://placehold.jp/300x350/f8f9fa/333333?text=圖片載入失敗\'">';
+      card += '<img src="' + imageUrl + '" alt="' + name + ' 的穿搭" class="outfit-image" onload="checkImageSize(this)" onerror="this.src=\'https://placehold.jp/300x350/f8f9fa/333333?text=圖片載入失敗\'">';
       card += '<div class="outfit-info">';
       // 新增：投票徽章（右上角）
       if (voteCount > 0) {
@@ -931,6 +931,29 @@ if (modalUserInfo) {
   window.openModal = openModal;
   window.closeModal = closeModal;
   window.currentModal = currentModal;
+
+  // 檢查圖片尺寸並調整顯示方式
+  window.checkImageSize = function(img) {
+    // 等圖片載入完成
+    if (img.complete && img.naturalWidth > 0) {
+      const naturalWidth = img.naturalWidth;
+      const naturalHeight = img.naturalHeight;
+      
+      console.log('檢查圖片尺寸:', naturalWidth, 'x', naturalHeight);
+      
+      // 如果圖片太小（例如小於 400px 寬或 300px 高），使用 contain 模式
+      if (naturalWidth < 400 || naturalHeight < 300) {
+        img.style.objectFit = 'contain';
+        img.classList.add('small-image');
+        console.log('小圖片，使用 contain 模式');
+      } else {
+        // 大圖片使用 cover 模式
+        img.style.objectFit = 'cover';
+        img.classList.remove('small-image');
+        console.log('正常大小圖片，使用 cover 模式');
+      }
+    }
+  };
   
   // 初始化
   if (document.readyState === 'loading') {
