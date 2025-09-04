@@ -15,11 +15,11 @@
   window.userInteractions = {};
   let isLoadingInteractions = false;
   
-  // 🔴 確保這兩行在這裡，而不是在函數內部
+  // 確保這兩行在這裡，而不是在函數內部
   let memberVerified = false;
   let memberData = null;
   
-  // 🔴 並且要設為 window 物件的屬性，讓其他地方可以存取
+  // 並且要設為 window 物件的屬性，讓其他地方可以存取
   window.memberVerified = false;
   window.memberData = null;
   
@@ -90,7 +90,7 @@
       });
     }
 
-      // ✅ 新增：確保 verifyMemberLogin 函數存在
+      // 新增：確保 verifyMemberLogin 函數存在
       if (typeof verifyMemberLogin !== 'function') {
         console.log('⚠️ verifyMemberLogin 函數不存在，重新定義...');
         window.verifyMemberLogin = verifyMemberLogin;
@@ -213,7 +213,7 @@
         memberVerified = false;
         window.memberVerified = false;
         
-        // 🔴 特別處理：如果是找不到會員資料，可能是 EasyStore API 問題
+        // 特別處理：如果是找不到會員資料，可能是 EasyStore API 問題
         if (result.error && result.error.includes('找不到會員資料')) {
           console.log('⚠️ EasyStore API 找不到會員，可能需要檢查 API 權限或會員狀態');
           window.showToast('⚠️ 會員驗證失敗：' + result.error);
@@ -227,7 +227,7 @@
     }
   }
   
-  // ✅ 將函數暴露到全域
+  // 將函數暴露到全域
   window.verifyMemberLogin = verifyMemberLogin;
   
   // 設定模態框功能
@@ -405,12 +405,6 @@ if (modalUserInfo) {
       modalSocial.style.display = 'none';
     }
 
-    // 重置計數顯示
-    const purchaseCountElement = document.getElementById('modalPurchaseCount');
-    if (purchaseCountElement) {
-      purchaseCountElement.textContent = '0';
-    }
-     
     // 更新投票按鈕狀態
     const hasVoted = userInteractions[outfitId]?.vote || false;
     updateModalVoteButton(outfit, hasVoted);
@@ -637,11 +631,11 @@ if (modalUserInfo) {
         continue;
       }
 
-      // 讀取實際的計數
-      const loveCount = outfit['按讚數'] || 0;
-      const refCount = outfit['參考數'] || 0;
-      const purchaseCount = outfit['購買數'] || 0;
-      const voteCount = outfit['投票數'] || 0;
+      // 讀取實際的計數 - 加強版安全處理
+      const loveCount = parseInt(outfit['按讚數']) || 0;
+      const refCount = parseInt(outfit['參考數']) || 0;
+      const purchaseCount = parseInt(outfit['購買數']) || 0;
+      const voteCount = parseInt(outfit['投票數']) || 0;
       
       // 檢查用戶是否已經互動過
       const outfitId = outfit['投稿ID'];
@@ -792,11 +786,11 @@ if (modalUserInfo) {
       
       if (hasVoted) {
         modalVoteBtn.classList.add('voted');
-        modalVoteBtn.innerHTML = `<span>✅</span><span id="modalVoteCount">${voteCount}</span>已投票`;
+        modalVoteBtn.innerHTML = `<span>✅</span><span class="count" id="modalVoteCount">${voteCount}</span>已投票`;
         modalVoteBtn.disabled = true; // 投票後禁用
       } else {
         modalVoteBtn.classList.remove('voted');
-        modalVoteBtn.innerHTML = `<span>🗳️</span><span id="modalVoteCount">${voteCount}</span>投票支持`;
+        modalVoteBtn.innerHTML = `<span>🗳️</span><span class="count" id="modalVoteCount">${voteCount}</span>投票支持`;
         modalVoteBtn.disabled = false;
       }
     }
@@ -853,12 +847,35 @@ if (modalUserInfo) {
     
     const submissionId = outfit['投稿ID'];
     const memberEmail = window.memberData.email;
-    const countSpan = button.querySelector('.count');
+    
+    // 特殊處理：為投票按鈕尋找或創建計數元素
+    let countSpan = button.querySelector('.count');
+    
+    if (!countSpan) {
+      // 如果是投票按鈕且沒有 .count 元素，嘗試找到或創建
+      if (interactionType === 'vote') {
+        // 嘗試從 Modal 中找投票計數
+        countSpan = document.getElementById('modalVoteCount');
+        
+        if (!countSpan) {
+          // 創建一個計數元素
+          countSpan = document.createElement('span');
+          countSpan.className = 'count';
+          countSpan.id = 'modalVoteCount';
+          countSpan.textContent = outfit['投票數'] || 0;
+          button.appendChild(countSpan);
+          console.log('已為投票按鈕創建計數元素');
+        }
+      } else {
+        console.error('找不到計數元素，interactionType:', interactionType);
+        return;
+      }
+    }
 
     // 檢查當前狀態
     const hasInteracted = window.userInteractions[submissionId]?.[interactionType] || false;
     
-    // 🔴 修正：安全的計數取得
+    // 安全的計數取得
     let currentCount = 0;
     if (countSpan) {
       const textContent = countSpan.textContent;
@@ -866,7 +883,6 @@ if (modalUserInfo) {
         currentCount = parseInt(textContent) || 0;
       } else {
         // 如果 textContent 有問題，從原始數據恢復
-        const outfit = window.outfitData[index];
         const countMap = {
           'like': '按讚數',
           'reference': '參考數',
@@ -877,12 +893,9 @@ if (modalUserInfo) {
         countSpan.textContent = currentCount; // 修復 DOM
         console.log(`已修復 ${interactionType} 計數:`, currentCount);
       }
-    } else {
-      console.error('找不到計數元素');
-      return;
     }
         
-    // 🔴 投票邏輯：只能投票，不能取消
+    // 投票邏輯：只能投票，不能取消
     if (interactionType === 'vote') {
       if (hasInteracted) {
         window.showToast('ℹ️ 您已經投過票了');
@@ -893,19 +906,9 @@ if (modalUserInfo) {
       if (!confirm(`確定要投票給「${outfit['顯示名稱'] || outfit['會員Email']}」的穿搭嗎？\n投票後無法取消。`)) {
         return;
       }
-      let countSpan = button.querySelector('.count');
-      if (!countSpan) {
-        // 如果是 Modal 中的投票按鈕，使用 ID 查找
-        countSpan = document.getElementById('modalVoteCount');
-        if (!countSpan) {
-          console.error('找不到投票計數元素');
-          return;
-        }
-      }
       
       // 禁用按鈕，防止重複點擊
       button.disabled = true;
-      const originalText = button.innerHTML;
       
       // 發送投票請求到後端
       fetch(window.OUTFIT_SCRIPT_URL, {
@@ -922,7 +925,7 @@ if (modalUserInfo) {
         if (result.success) {
           // 更新本地狀態
           currentCount = result.newCount;
-          countSpan.textContent = currentCount;
+          if (countSpan) countSpan.textContent = currentCount;
           button.classList.add('voted');
           
           // 更新本地互動記錄
@@ -956,11 +959,11 @@ if (modalUserInfo) {
       return;
     }
     
-    // 🔴 其他互動邏輯：可以切換（取消/新增）
+    // 其他互動邏輯：可以切換（取消/新增）
     if (hasInteracted) {
       // 取消互動
       currentCount = Math.max(0, currentCount - 1);
-      countSpan.textContent = currentCount;
+      if (countSpan) countSpan.textContent = currentCount;
       button.classList.remove(getInteractionClass(interactionType));
       window.userInteractions[submissionId][interactionType] = false;
       
@@ -975,7 +978,7 @@ if (modalUserInfo) {
     } else {
       // 新增互動
       currentCount += 1;
-      countSpan.textContent = currentCount;
+      if (countSpan) countSpan.textContent = currentCount;
       button.classList.add(getInteractionClass(interactionType));
       
       if (!window.userInteractions[submissionId]) {
@@ -1000,22 +1003,21 @@ if (modalUserInfo) {
     };
     outfit[countMap[interactionType]] = currentCount;
     
-    // 同步到後端保存
+    // 同步到後端保存（不再傳送 isToggle，讓後端自動處理切換）
     fetch(window.OUTFIT_SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify({
         action: 'handleInteraction',
         memberEmail: memberEmail,
         submissionId: submissionId,
-        interactionType: interactionType,
-        isToggle: hasInteracted ? 'cancel' : 'add'
+        interactionType: interactionType
       })
     })
     .then(response => response.json())
     .then(result => {
       if (result.success) {
         const finalCount = result.newCount;
-        countSpan.textContent = finalCount;
+        if (countSpan) countSpan.textContent = finalCount;
         outfit[countMap[interactionType]] = finalCount;
         
         if (window.currentModal === index) {
@@ -1025,12 +1027,12 @@ if (modalUserInfo) {
         console.log(`✅ ${interactionType} 互動已同步到後端，最終計數: ${finalCount}`);
       } else {
         console.error('後端同步失敗:', result.error);
-        window.showToast('⚠️ 資料同步失敗，請重新整理頁面');
+        // 不顯示錯誤提示，因為前端已經更新了
       }
     })
     .catch(error => {
       console.error('後端同步錯誤:', error);
-      window.showToast('⚠️ 網路錯誤，互動可能未保存');
+      // 不顯示錯誤提示，因為前端已經更新了
     });
     
     // 同步更新 Modal（如果開啟中）
@@ -1044,8 +1046,6 @@ if (modalUserInfo) {
   // 處理 Modal 中的投票
   window.handleModalVote = function() {
     if (window.currentModal !== null && window.outfitData[window.currentModal]) {
-      const outfit = window.outfitData[window.currentModal];
-      const outfitId = outfit['投稿ID'];
       const modalVoteBtn = document.getElementById('modalVoteBtn');
       
       // 使用現有的 handleInteraction 機制
