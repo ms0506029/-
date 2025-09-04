@@ -1060,11 +1060,6 @@ if (modalUserInfo) {
       button.disabled = false;
     });
     
-    // 同步更新 Modal（如果開啟中）
-    if (window.currentModal === index) {
-      updateModalCounts(outfit);
-    }
-  };
 
   // ========== 投票相關函數 ==========
 
