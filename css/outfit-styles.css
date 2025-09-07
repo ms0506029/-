@@ -201,14 +201,11 @@
 }
 
 .modal-content {
-  background: white;
-  border-radius: 12px;
-  max-width: 900px;
+  /* 讓Modal可以根據圖片大小自動調整 */
+  max-width: 90vw;
   max-height: 90vh;
-  width: 90%;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: auto; /* 改成自動寬度 */
+  overflow: auto; /* 允許滾動 */
 }
 
 .modal-close {
@@ -236,19 +233,28 @@
 }
 
 .modal-body {
+  /* 調整Modal內容布局 */
   display: flex;
-  height: 100%;
+  flex-direction: row; /* 或根據現有布局調整 */
+  gap: 20px;
 }
 
 .modal-image {
+  /* 讓圖片容器不限制大小 */
   flex: 1;
-  background: #f8f9fa;
+  max-width: none; /* 移除寬度限制 */
+  height: auto; /* 自動高度 */
 }
 
 .modal-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  /* 讓圖片以原始比例顯示 */
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 80vh; /* 只限制最大高度避免超出螢幕 */
+  object-fit: none; /* 不縮放，保持原始大小 */
+  display: block;
+  margin: 0 auto;
 }
 
 .modal-info {
@@ -1809,16 +1815,16 @@
   }
 }
 
-/* 手機橫向模式優化 */
-@media (max-width: 768px) and (orientation: landscape) {
+/* 手機版適配 */
+@media (max-width: 768px) {
   .modal-body {
-    flex-direction: row;
+    flex-direction: column; /* 手機版改成上下排列 */
   }
   
-  .modal-image {
-    max-height: 100%;
-    max-width: 40%;
+  .modal-image img {
+    max-height: 60vh; /* 手機版調整最大高度 */
   }
+}
   
   .modal-info {
     flex: 1;
