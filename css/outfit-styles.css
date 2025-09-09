@@ -201,6 +201,10 @@
 }
 
 .modal-content {
+  background-color: #ffffff;  /* 白色卡片背景 */
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
   max-width: 95vw;        /* 增加最大寬度 */
   max-height: 95vh;       /* 增加最大高度 */
   width: auto;            /* 改為自動寬度 */
@@ -233,6 +237,9 @@
 }
 
 .modal-body {
+  background-color: #ffffff;  /* 確保內容區域是白色 */
+  border-radius: 8px;
+
   display: flex;
   flex-direction: row;    /* 圖片和資訊並排 */
   gap: 20px;
@@ -258,6 +265,9 @@
 
 
 .modal-info {
+  background-color: #ffffff;  /* 確保右側資訊區域是白色 */
+  padding: 20px;
+
   flex: 1;                /* 佔據剩餘空間 */
   padding: 20px;
   overflow-y: auto;       /* 允許垂直滾動 */
