@@ -1355,8 +1355,9 @@ function checkAgreementBeforeSubmit() {
   
   return true;
 }
-
-
+// 註冊為全域函數
+window.checkAgreementBeforeSubmit = checkAgreementBeforeSubmit;
+window.toggleAdvancedProducts = toggleAdvancedProducts;
 });
 
 console.log('✅ outfit-upload.js (Google Drive 版) 載入完成');
