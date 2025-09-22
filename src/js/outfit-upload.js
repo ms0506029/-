@@ -1269,7 +1269,79 @@ window.addEventListener('load', function() {
     console.log('⚠️ 偵測到未初始化，執行備用初始化...');
     initUploadForm();
   }
+// ===== 投稿同意書功能 =====
 
+/**
+ * 切換同意書顯示/隱藏
+ */
+function toggleAgreement(event) {
+  event.preventDefault();
+  const content = document.getElementById('agreementContent');
+  const isVisible = content.style.display !== 'none';
+  
+  if (isVisible) {
+    content.style.display = 'none';
+  } else {
+    content.style.display = 'block';
+  }
+}
+
+/**
+ * 切換完整版同意書內容
+ */
+function toggleFullTerms() {
+  const fullContent = document.getElementById('fullAgreementContent');
+  const toggleText = document.getElementById('toggleText');
+  const toggleIcon = document.getElementById('toggleIcon');
+  const toggleBtn = document.querySelector('.toggle-full-btn');
+  
+  const isVisible = fullContent.style.display !== 'none';
+  
+  if (isVisible) {
+    // 隱藏完整版
+    fullContent.style.display = 'none';
+    toggleText.textContent = '📄 查看完整同意書內容';
+    toggleIcon.textContent = '▼';
+    toggleBtn.classList.remove('expanded');
+  } else {
+    // 顯示完整版
+    fullContent.style.display = 'block';
+    toggleText.textContent = '📄 收合完整同意書內容';
+    toggleIcon.textContent = '▲';
+    toggleBtn.classList.add('expanded');
+    
+    // 平滑滾動到完整版內容
+    setTimeout(() => {
+      fullContent.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest' 
+      });
+    }, 100);
+  }
+}
+
+/**
+ * 檢查同意書是否已勾選
+ */
+function checkAgreementBeforeSubmit() {
+  const agreementCheck = document.getElementById('agreementCheck');
+  
+  if (!agreementCheck.checked) {
+    alert('⚠️ 請先閱讀並同意投稿活動條款才能繼續投稿');
+    
+    // 自動展開同意書讓用戶注意到
+    const content = document.getElementById('agreementContent');
+    if (content.style.display === 'none') {
+      toggleAgreement({ preventDefault: () => {} });
+    }
+    
+    // 聚焦到勾選框
+    agreementCheck.focus();
+    return false;
+  }
+  
+  return true;
+}
 
 
 });
