@@ -354,7 +354,7 @@ function setupProductInputs() {
   // 基本商品資訊切換
   var basicProductTypeRadios = document.querySelectorAll('input[name="basicProductType"]');
   basicProductTypeRadios.forEach(function(radio) {
-    radio.addEventListener('change', function() {
+    radio.('change', function() {
       toggleProductInput('basic', this.value);
       window.showToast('💡 切換到' + (this.value === 'url' ? '網址' : '名稱') + '模式');
     });
@@ -365,7 +365,7 @@ function setupProductInputs() {
   productTypes.forEach(function(type) {
     var radios = document.querySelectorAll('input[name="' + type + 'ProductType"]');
     radios.forEach(function(radio) {
-      radio.addEventListener('change', function() {
+      radio.('change', function() {
         toggleProductInput(type, this.value);
       });
     });
@@ -438,9 +438,16 @@ function setupFormSubmit() {
   }
   
   // 按鈕點擊事件
+  // 按鈕點擊事件
   submitBtn.onclick = function(e) {
     e.preventDefault();
     console.log('🔘 按鈕點擊事件觸發');
+    
+    // 新增：檢查同意書是否已勾選
+    if (!checkAgreementBeforeSubmit()) {
+      return false; // 如果沒勾選就直接返回，不執行投稿
+    }
+    
     submitOutfit();
     return false;
   };
@@ -623,7 +630,7 @@ function setupInstagramInputs() {
   // Instagram 帳號即時預覽
   var handleInput = document.getElementById('instagramHandle');
   if (handleInput) {
-    handleInput.addEventListener('input', function(e) {
+    handleInput.('input', function(e) {
       const value = e.target.value.trim();
       // 移除 @ 符號（如果用戶輸入了）
       if (value.startsWith('@')) {
@@ -635,7 +642,7 @@ function setupInstagramInputs() {
   // Instagram 連結自動填充帳號
   var urlInput = document.getElementById('instagramUrl');
   if (urlInput) {
-    urlInput.addEventListener('blur', function(e) {
+    urlInput.('blur', function(e) {
       const url = e.target.value.trim();
       const handleInputElement = document.getElementById('instagramHandle');
       
@@ -950,7 +957,7 @@ function injectProductCardStyles() {
 
 // 在初始化時注入樣式
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', injectProductCardStyles);
+  document.('DOMContentLoaded', injectProductCardStyles);
 } else {
   injectProductCardStyles();
 }
@@ -1033,7 +1040,7 @@ function createStandardProductSelector(type, products, urlInput) {
   selector.style.marginBottom = '10px';
   
   // 選擇時自動填入
-  selector.addEventListener('change', function() {
+  selector.('change', function() {
     if (this.value) {
       urlInput.value = this.value;
       window.showToast('✅ 已選擇：' + this.options[this.selectedIndex].text);
@@ -1252,7 +1259,7 @@ function setupDebug() {
 
 // 確保 DOM 載入完成後執行初始化
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function() {
+  document.('DOMContentLoaded', function() {
     console.log('DOM 載入完成，開始初始化...');
     initUploadForm();
   });
