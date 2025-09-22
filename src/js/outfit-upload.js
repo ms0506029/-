@@ -354,18 +354,19 @@ function setupProductInputs() {
   // 基本商品資訊切換
   var basicProductTypeRadios = document.querySelectorAll('input[name="basicProductType"]');
   basicProductTypeRadios.forEach(function(radio) {
-    radio.('change', function() {
+    radio.addEventListener('change', function() {  // ✅ 修正
       toggleProductInput('basic', this.value);
       window.showToast('💡 切換到' + (this.value === 'url' ? '網址' : '名稱') + '模式');
     });
   });
   
   // 進階商品資訊切換
+  
   var productTypes = ['top', 'bottom', 'outer', 'shoes', 'accessory'];
   productTypes.forEach(function(type) {
     var radios = document.querySelectorAll('input[name="' + type + 'ProductType"]');
     radios.forEach(function(radio) {
-      radio.('change', function() {
+      radio.addEventListener('change', function() {  // ✅ 修正
         toggleProductInput(type, this.value);
       });
     });
@@ -630,7 +631,7 @@ function setupInstagramInputs() {
   // Instagram 帳號即時預覽
   var handleInput = document.getElementById('instagramHandle');
   if (handleInput) {
-    handleInput.('input', function(e) {
+    handleInput.addEventListener('input', function(e) {
       const value = e.target.value.trim();
       // 移除 @ 符號（如果用戶輸入了）
       if (value.startsWith('@')) {
@@ -642,7 +643,7 @@ function setupInstagramInputs() {
   // Instagram 連結自動填充帳號
   var urlInput = document.getElementById('instagramUrl');
   if (urlInput) {
-    urlInput.('blur', function(e) {
+    urlInput.addEventListener('blur', function(e) { 
       const url = e.target.value.trim();
       const handleInputElement = document.getElementById('instagramHandle');
       
@@ -957,7 +958,7 @@ function injectProductCardStyles() {
 
 // 在初始化時注入樣式
 if (document.readyState === 'loading') {
-  document.('DOMContentLoaded', injectProductCardStyles);
+  document.addEventListener('DOMContentLoaded', injectProductCardStyles);  // ✅ 修正
 } else {
   injectProductCardStyles();
 }
@@ -1040,7 +1041,7 @@ function createStandardProductSelector(type, products, urlInput) {
   selector.style.marginBottom = '10px';
   
   // 選擇時自動填入
-  selector.('change', function() {
+  selector.addEventListener('change', function() {  // ✅ 修正
     if (this.value) {
       urlInput.value = this.value;
       window.showToast('✅ 已選擇：' + this.options[this.selectedIndex].text);
@@ -1259,7 +1260,7 @@ function setupDebug() {
 
 // 確保 DOM 載入完成後執行初始化
 if (document.readyState === 'loading') {
-  document.('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function() {  // ✅ 修正
     console.log('DOM 載入完成，開始初始化...');
     initUploadForm();
   });
