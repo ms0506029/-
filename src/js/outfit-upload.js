@@ -1293,7 +1293,9 @@ function toggleAgreement(event) {
     content.style.display = 'block';
   }
 }
-
+// 註冊為全域函數
+window.toggleAgreement = toggleAgreement;
+  
 /**
  * 切換完整版同意書內容
  */
