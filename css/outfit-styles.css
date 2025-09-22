@@ -2078,3 +2078,221 @@
     min-width: 70px;
   }
 }
+/* ===== 投稿同意書樣式 ===== */
+.agreement-section {
+  margin: 20px 0;
+  padding: 15px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.agreement-checkbox {
+  display: flex;
+  align-items: flex-start;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  gap: 10px;
+}
+
+.agreement-checkbox input[type="checkbox"] {
+  margin: 0;
+  margin-top: 2px;
+}
+
+.agreement-toggle {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.agreement-toggle:hover {
+  text-decoration: underline;
+}
+
+.agreement-content {
+  margin-top: 15px;
+  padding: 15px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* 濃縮版樣式 */
+.agreement-summary h4 {
+  color: #2c3e50;
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+}
+
+.agreement-summary p {
+  margin: 8px 0;
+  color: #495057;
+  font-size: 0.85rem;
+}
+
+.agreement-summary ul {
+  margin: 5px 0 10px 20px;
+  color: #495057;
+  font-size: 0.85rem;
+}
+
+.agreement-summary li {
+  margin: 3px 0;
+}
+
+/* 展開完整版按鈕 */
+.full-terms-toggle {
+  margin: 15px 0;
+  text-align: center;
+  border-top: 1px solid #e9ecef;
+  padding-top: 15px;
+}
+
+.toggle-full-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto;
+}
+
+.toggle-full-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+#toggleIcon {
+  transition: transform 0.3s ease;
+  font-size: 0.8rem;
+}
+
+.toggle-full-btn.expanded #toggleIcon {
+  transform: rotate(180deg);
+}
+
+/* 完整版內容樣式 */
+.full-agreement-content {
+  margin-top: 15px;
+  padding: 20px;
+  background: #fdfdfd;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  max-height: 500px;
+  overflow-y: auto;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+}
+
+.full-terms-header h3 {
+  color: #2c3e50;
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+  text-align: center;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 10px;
+}
+
+.full-terms-header p {
+  color: #6c757d;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin-bottom: 20px;
+}
+
+.terms-section {
+  margin-bottom: 20px;
+}
+
+.terms-section h4 {
+  color: #495057;
+  font-size: 0.9rem;
+  margin: 0 0 10px 0;
+  padding: 8px 12px;
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.terms-section ol {
+  margin: 0 0 0 20px;
+  padding: 0;
+}
+
+.terms-section li {
+  margin: 8px 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #495057;
+}
+
+.terms-section ul {
+  margin: 5px 0 5px 20px;
+}
+
+.terms-section ul li {
+  margin: 3px 0;
+  font-size: 0.75rem;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .agreement-content {
+    max-height: 350px;
+    padding: 12px;
+  }
+  
+  .full-agreement-content {
+    max-height: 400px;
+    padding: 15px;
+  }
+  
+  .agreement-summary p,
+  .terms-section li {
+    font-size: 0.8rem;
+  }
+  
+  .toggle-full-btn {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .agreement-section {
+    padding: 12px;
+  }
+  
+  .agreement-content {
+    max-height: 300px;
+  }
+  
+  .full-agreement-content {
+    max-height: 350px;
+    padding: 12px;
+  }
+}
