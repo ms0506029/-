@@ -1328,6 +1328,9 @@ function toggleFullTerms() {
   }
 }
 
+// 註冊為全域函數
+window.toggleFullTerms = toggleFullTerms;
+
 /**
  * 檢查同意書是否已勾選
  */
