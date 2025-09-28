@@ -1,0 +1,10 @@
+{
+  "timeZone": "Asia/Taipei",
+  "exceptionLogging": "STACKDRIVER",
+  "dependencies": {},
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive.readonly"
+  ]
+}
