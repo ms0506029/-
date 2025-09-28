@@ -1,0 +1,16 @@
+{%- comment -%}
+Outfit 個人頁：容器 + SEO（固定 script 由 GitHub Pages 提供）
+使用方式：
+  1) 建立一個 Page（例如：outfit-profile），內文貼上本 snippet 全部內容
+  2) 以網址帶參數：/pages/outfit-profile?handle=@demo （或在下方 data-handle 直接填）
+{%- endcomment -%}
+
+<div id="outfit-profile-root" data-handle=""></div>
+
+<link rel="canonical" href="{{ shop.url }}/pages/outfit-profile">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Outfit 個人頁 - {{ page.title | escape }}">
+
+{%- comment -%} 從 GitHub Pages 載入前端 JS；請改成你的 Pages 網址 {%- endcomment -%}
+<script type="module" src="https://ms0506029.github.io/-/outfit-profile.js
+"></script>
