@@ -1,0 +1,7 @@
+{
+  "readAllowed": ["src/**", "css/**", "gas/**", "frontend/**", "liquid/**", "agent/**", ".github/**"],
+  "writeDenied": ["src/js/**", "css/**"], 
+  "writeAllowed": ["src/shared/**", "frontend/**", "gas/**", "liquid/**", "agent/**", ".github/**"],
+  "highRiskThreshold": 500,
+  "requirePRFor": ["frontend/**", "gas/**", "liquid/**", "src/**"]
+}
