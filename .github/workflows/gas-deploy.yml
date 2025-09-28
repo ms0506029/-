@@ -1,0 +1,30 @@
+name: Deploy GAS (clasp)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "gas/**"
+      - ".clasp.json"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: ${{ secrets.CLASPRC_JSON && secrets.GAS_DEPLOYMENT_ID }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i -g @google/clasp
+      - name: Restore ~/.clasprc.json
+        run: |
+          echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
+          chmod 600 ~/.clasprc.json
+      - run: clasp --version && cat .clasp.json
+      - name: Push to Apps Script
+        run: clasp push -f
+      - name: Create version
+        run: clasp version "CI ${{ github.sha }}"
+      - name: Deploy Web App (update existing)
+        run: clasp deploy -i '${{ secrets.GAS_DEPLOYMENT_ID }}' -d "CI deploy ${{ github.run_number }}"
