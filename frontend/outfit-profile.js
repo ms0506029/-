@@ -4,7 +4,7 @@ import { getCurrentMember } from "../src/shared/legacy-compat/auth.js";
 import { like, markReference, markPurchase, follow as followCreator, unfollow as unfollowCreator } from "../src/shared/legacy-compat/interactions.js";
 
 const GAS_BASE = "https://script.google.com/macros/s/AKfycbw5RiNNZmKaC-NK2cwrTwoFZ9mT6YG42PZ3vJ2XhltnzXBBFO1qZuJ_XAXScbTRUxme/exec";
-setBaseUrl(GAS_BASE);
+setBaseUrl(window.OUTFIT_SCRIPT_URL || GAS_BASE);
 
 const state = {
   handle: "@demo",
