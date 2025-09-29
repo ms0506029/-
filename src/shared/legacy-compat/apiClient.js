@@ -1,61 +1,35 @@
 // src/shared/legacy-compat/apiClient.js
-// Compatibility wrapper for GAS endpoints used by legacy outfit wall modules.
 const DEFAULT_GAS_BASE = "https://script.google.com/macros/s/AKfycbw5RiNNZmKaC-NK2cwrTwoFZ9mT6YG42PZ3vJ2XhltnzXBBFO1qZuJ_XAXScbTRUxme/exec";
-let baseUrl = typeof window !== "undefined" && window.OUTFIT_SCRIPT_URL
-  ? window.OUTFIT_SCRIPT_URL
-  : DEFAULT_GAS_BASE;
+let baseUrl = (typeof window !== "undefined" && window.OUTFIT_SCRIPT_URL) || DEFAULT_GAS_BASE;
 
-export function setBaseUrl(url) {
-  if (typeof url === "string" && url.trim()) {
-    baseUrl = url.trim();
+export function setBaseUrl(url){ if (url) baseUrl = url; }
+
+function q(params){ const s = new URLSearchParams(params||{}); return s.toString() ? `?${s}` : ""; }
+
+async function fetchJson(url, options = {}, retry = 1){
+  const res = await fetch(url, options);
+  const txt = await res.text();
+  let data = {}; try { data = txt ? JSON.parse(txt) : {}; } catch { data = { error: "Invalid JSON" }; }
+  if (!res.ok || data.error){
+    if (retry > 0) return fetchJson(url, options, retry-1);
+    throw new Error(data.error || res.statusText);
   }
-}
-
-export function getBaseUrl() {
-  return baseUrl;
-}
-
-function buildQuery(params) {
-  const search = new URLSearchParams(params || {});
-  const query = search.toString();
-  return query ? `?${query}` : "";
-}
-
-async function fetchJson(path, options = {}, retries = 1) {
-  const url = `${baseUrl}${path || ""}`;
-  const request = {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  };
-
-  const response = await fetch(url, request);
-  const raw = await response.text();
-  let data = {};
-  try {
-    data = raw ? JSON.parse(raw) : {};
-  } catch (err) {
-    data = { error: "Invalid JSON response" };
-  }
-
-  if (!response.ok || data?.error) {
-    if (retries > 0) {
-      return fetchJson(path, options, retries - 1);
-    }
-    const message = data?.error || response.statusText || "Request failed";
-    throw new Error(message);
-  }
-
   return data;
 }
 
-export async function get(path = "", params = {}) {
-  return fetchJson(`${path}${buildQuery(params)}`);
+export function get(path = "", params = {}){
+  const url = `${baseUrl}${path}${q(params)}`;
+  // 不要加任何自訂標頭，避免預檢
+  return fetchJson(url);
 }
 
-export async function post(path = "", payload = {}) {
-  return fetchJson(path, { method: "POST", body: JSON.stringify(payload) });
-}
-
-export async function del(path = "", payload = {}) {
-  return fetchJson(path, { method: "DELETE", body: JSON.stringify(payload) });
+export function post(path = "", payload = {}){
+  const url = `${baseUrl}${path}`;
+  // 用 x-www-form-urlencoded（簡單請求，不會預檢）
+  const body = new URLSearchParams(payload).toString();
+  return fetchJson(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+    body
+  });
 }
