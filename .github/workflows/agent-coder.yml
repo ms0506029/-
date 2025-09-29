@@ -1,0 +1,48 @@
+name: agent-coder
+
+on:
+  issue_comment:
+    types: [created]            # 在 Issue 底下留言觸發
+  workflow_dispatch:            # 也可手動填指令觸發
+    inputs:
+      instruction:
+        description: "Agent instruction"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+jobs:
+  plan_and_pr:
+    # 允許：手動觸發 或 在 Issue 留言以 /agent 開頭指令
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.issue.pull_request == null &&
+       startsWith(github.event.comment.body, '/agent'))
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm i openai @octokit/rest simple-git
+
+      - name: Run agent
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ALLOWED_GLOBS: gas/**
+        run: |
+          node agent/bot.mjs \
+            "${{ github.event_name == 'workflow_dispatch' && inputs.instruction || github.event.comment.body }}"

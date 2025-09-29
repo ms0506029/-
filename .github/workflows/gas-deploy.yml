@@ -1,30 +1,64 @@
-name: Deploy GAS (clasp)
+name: Deploy GAS via CLASP
 
 on:
   push:
-    branches: [ main ]
-    paths:
-      - "gas/**"
-      - ".clasp.json"
-  workflow_dispatch:
+    branches: [ main ]   # 或你想要自動部署的分支
 
 jobs:
   deploy:
-    if: ${{ secrets.CLASPRC_JSON && secrets.GAS_DEPLOYMENT_ID }}
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - run: npm i -g @google/clasp
-      - name: Restore ~/.clasprc.json
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install clasp
+        run: npm i -g @google/clasp
+
+      # 把 Secrets 寫成檔案（Heredoc 可安全處理多行 JSON）
+      - name: Write ~/.clasprc.json from secret
         run: |
-          echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
-          chmod 600 ~/.clasprc.json
-      - run: clasp --version && cat .clasp.json
-      - name: Push to Apps Script
+          mkdir -p ~/.config/configstore
+          cat > ~/.clasprc.json <<'JSON'
+          ${{ secrets.CLASPRC_JSON }}
+          JSON
+          # 也寫一份到 configstore 以符合舊版 clasp 搜尋位置（保險）
+          cat > ~/.config/configstore/clasp.json <<'JSON'
+          ${{ secrets.CLASPRC_JSON }}
+          JSON
+
+      - name: Write oauth_client.json from secret
+        run: |
+          cat > ./oauth_client.json <<'JSON'
+          ${{ secrets.OAUTH_CLIENT_JSON }}
+          JSON
+
+      # 確保 .clasp.json 正確（你已經有就略過；若要覆寫可在這裡 echo）
+      # - name: Write .clasp.json (optional)
+      #   run: |
+      #     cat > ./.clasp.json <<'JSON'
+      #     {"scriptId":"<你的ScriptID>","rootDir":"gas","projectId":"github-473513"}
+      #     JSON
+
+      - name: Show clasp status (optional)
+        run: clasp login --status || true
+
+      - name: Push source
         run: clasp push -f
-      - name: Create version
-        run: clasp version "CI ${{ github.sha }}"
-      - name: Deploy Web App (update existing)
-        run: clasp deploy -i '${{ secrets.GAS_DEPLOYMENT_ID }}' -d "CI deploy ${{ github.run_number }}"
+
+      - name: Deploy to existing prod deployment
+        env:
+          DEPLOY_ID: ${{ secrets.GAS_DEPLOYMENT_ID }}
+        run: |
+          clasp deploy --deploymentId "$DEPLOY_ID" --description "ci $GITHUB_SHA"
+
+      # 可選：簡單 smoke test
+      - name: Smoke test hitting Web App
+        if: ${{ secrets.WEB_APP_URL != '' }}
+        run: |
+          curl -sSfL "${{ secrets.WEB_APP_URL }}?route=profile" | head -c 500 || exit 1
