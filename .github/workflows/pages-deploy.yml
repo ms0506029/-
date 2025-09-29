@@ -1,34 +1,69 @@
-name: Deploy GitHub Pages
+name: Deploy GAS (clasp)
+
 on:
   push:
     branches: [ main ]
+    paths:
+      - "gas/**"
+      - ".clasp.json"
+      - ".github/workflows/gas-deploy.yml"
+  workflow_dispatch:
+
 permissions:
   contents: read
-  pages: write
-  id-token: write
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+
+    # 將 Secrets 映射成環境變數，避免在 if 直接引用 secrets.*
+    env:
+      CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+      GAS_DEPLOYMENT_ID: ${{ secrets.GAS_DEPLOYMENT_ID }}
+      WEB_APP_URL: ${{ secrets.WEB_APP_URL }}
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Prepare public bundle (frontend + compat)
-        run: |
-          set -e
-          mkdir -p public/frontend
-          cp -R frontend/. public/frontend/
-          # Publish legacy-compat adapters used by ES Modules
-          mkdir -p public/src/shared
-          cp -R src/shared/legacy-compat public/src/shared/legacy-compat
-      - name: Upload artifact (public/)
-        uses: actions/upload-pages-artifact@v3
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          path: public
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          node-version: "20"
+
+      - name: Validate required secrets
+        run: |
+          if [ -z "${CLASPRC_JSON}" ] || [ -z "${GAS_DEPLOYMENT_ID}" ]; then
+            echo "::error::Missing required secrets. Need CLASPRC_JSON and GAS_DEPLOYMENT_ID"
+            exit 1
+          fi
+
+      - name: Install clasp
+        run: npm i -g @google/clasp
+
+      # 寫入授權檔；同時寫到舊位置以相容不同 clasp 版本
+      - name: Write ~/.clasprc.json from secret
+        run: |
+          mkdir -p ~/.config/configstore
+          printf '%s\n' "${CLASPRC_JSON}" > ~/.clasprc.json
+          chmod 600 ~/.clasprc.json
+          printf '%s\n' "${CLASPRC_JSON}" > ~/.config/configstore/clasp.json
+          chmod 600 ~/.config/configstore/clasp.json
+
+      - name: Show clasp status (optional)
+        run: clasp login --status || true
+
+      - name: Push source
+        run: clasp push -f
+
+      - name: Create version (optional)
+        run: clasp version "CI ${GITHUB_SHA}" || true
+
+      - name: Deploy to existing prod deployment
+        run: clasp deploy --deploymentId "${GAS_DEPLOYMENT_ID}" --description "ci ${GITHUB_RUN_NUMBER}"
+
+      # 可選：簡單 smoke test（若未設定 WEB_APP_URL 就跳過）
+      - name: Smoke test hitting Web App
+        if: ${{ env.WEB_APP_URL != '' }}
+        run: |
+          curl -sSfL "${WEB_APP_URL}?route=profile&handle=@demo" | head -c 500 >/dev/null
