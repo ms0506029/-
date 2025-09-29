@@ -17,10 +17,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Upload artifact (frontend/)
+      - name: Prepare public bundle (frontend + compat)
+        run: |
+          set -e
+          mkdir -p public/frontend
+          cp -R frontend/. public/frontend/
+          # Publish legacy-compat adapters used by ES Modules
+          mkdir -p public/src/shared
+          cp -R src/shared/legacy-compat public/src/shared/legacy-compat
+      - name: Upload artifact (public/)
         uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend
+          path: public
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
