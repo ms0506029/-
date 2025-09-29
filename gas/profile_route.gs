@@ -113,10 +113,14 @@ function doPost(e) {
   var route = (e && e.parameter && (e.parameter.route || "")).toLowerCase();
   var body = {};
   if (e && e.postData && e.postData.contents) {
-    try {
-      body = JSON.parse(e.postData.contents);
-    } catch (err) {
-      return respondError("Invalid JSON", 400);
+    if (e.postData.type === "application/json") {
+      try {
+        body = JSON.parse(e.postData.contents);
+      } catch (err) {
+        return respondError("Invalid JSON", 400);
+      }
+    } else {
+      body = e.parameter || {};
     }
   }
 

@@ -14,22 +14,58 @@ async function fetchJson(url, options = {}, retry = 1){
     if (retry > 0) return fetchJson(url, options, retry-1);
     throw new Error(data.error || res.statusText);
   }
+}
+
+export function getBaseUrl() {
+  return baseUrl;
+}
+
+function buildQuery(params) {
+  const search = new URLSearchParams(params || {});
+  const query = search.toString();
+  return query ? `?${query}` : "";
+}
+
+async function request(path, options = {}, retries = 1) {
+  const url = `${baseUrl}${path || ""}`;
+  const response = await fetch(url, options);
+  const raw = await response.text();
+  let data = {};
+  try {
+    data = raw ? JSON.parse(raw) : {};
+  } catch (err) {
+    data = { error: "Invalid JSON response" };
+  }
+
+  if (!response.ok || data?.error) {
+    if (retries > 0) {
+      return request(path, options, retries - 1);
+    }
+    const message = data?.error || response.statusText || "Request failed";
+    throw new Error(message);
+  }
+
   return data;
 }
 
-export function get(path = "", params = {}){
-  const url = `${baseUrl}${path}${q(params)}`;
-  // 不要加任何自訂標頭，避免預檢
-  return fetchJson(url);
+export function get(path = "", params = {}) {
+  return request(`${path}${buildQuery(params)}`);
 }
 
-export function post(path = "", payload = {}){
-  const url = `${baseUrl}${path}`;
-  // 用 x-www-form-urlencoded（簡單請求，不會預檢）
+export function post(path = "", payload = {}) {
   const body = new URLSearchParams(payload).toString();
-  return fetchJson(url, {
+  return request(path, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-    body
+    body,
+  });
+}
+
+export function del(path = "", payload = {}) {
+  const body = new URLSearchParams(payload).toString();
+  return request(path, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+    body,
   });
 }
